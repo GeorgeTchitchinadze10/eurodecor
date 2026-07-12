@@ -203,6 +203,22 @@ def build_items(cat):
 def i18n(ka, en, tag="span"):
     return f'<{tag} class="ka">{ka}</{tag}><{tag} class="en">{en}</{tag}>'
 
+ICON_PATHS = {
+    "phone": '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.5-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/>',
+    "chat": '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.9-.9L3 20l1.3-3.9A8.4 8.4 0 1 1 21 11.5z"/>',
+    "send": '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
+    "pin": '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+    "chevL": '<polyline points="15 18 9 12 15 6"/>',
+    "chevR": '<polyline points="9 18 15 12 9 6"/>',
+    "close": '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    "zoom": '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>',
+}
+
+def icon(name, size=20):
+    return (f'<svg class="ic" width="{size}" height="{size}" viewBox="0 0 24 24" '
+            f'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
+            f'stroke-linejoin="round" aria-hidden="true">{ICON_PATHS[name]}</svg>')
+
 def head(title_ka, title_en, desc_ka, canonical):
     ld = f'''{{
       "@context":"https://schema.org","@type":"HomeGoodsStore",
@@ -219,6 +235,9 @@ def head(title_ka, title_en, desc_ka, canonical):
 <meta property="og:title" content="{esc(title_ka)} | {esc(title_en)}">
 <meta property="og:description" content="{esc(desc_ka)}">
 <meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Noto+Serif+Georgian:wght@500;600;700&family=Noto+Sans+Georgian:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" href="assets/img/logo.webp">
 <script type="application/ld+json">{ld}</script>'''
@@ -240,10 +259,10 @@ def header_html():
 def contact_bar():
     b = BIZ
     return f'''<nav class="contact-bar" aria-label="Contact">
-  <a href="tel:{esc(b['phone_tel'])}" class="cbtn cbtn-call">📞<span>{i18n("დარეკვა","Call")}</span></a>
-  <a href="https://wa.me/{esc(b['whatsapp'])}" class="cbtn cbtn-wa" target="_blank" rel="noopener">💬<span>WhatsApp</span></a>
-  <a href="{esc(b['messenger'])}" class="cbtn cbtn-msg" target="_blank" rel="noopener">✉️<span>Messenger</span></a>
-  <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener">📍<span>{i18n("მისამართი","Directions")}</span></a>
+  <a href="tel:{esc(b['phone_tel'])}" class="cbtn cbtn-call">{icon('phone')}<span>{i18n("დარეკვა","Call")}</span></a>
+  <a href="https://wa.me/{esc(b['whatsapp'])}" class="cbtn cbtn-wa" target="_blank" rel="noopener">{icon('chat')}<span>WhatsApp</span></a>
+  <a href="{esc(b['messenger'])}" class="cbtn cbtn-msg" target="_blank" rel="noopener">{icon('send')}<span>Messenger</span></a>
+  <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("მისამართი","Directions")}</span></a>
 </nav>'''
 
 def footer_html():
@@ -282,28 +301,56 @@ LANG_JS = '''<script>
 })();
 </script>'''
 
+LIGHTBOX_JS = '''<script>
+(function(){
+  var figs=[].slice.call(document.querySelectorAll('.item-grid .item'));
+  var ov=document.getElementById('lb');
+  if(!figs.length||!ov)return;
+  var big=document.getElementById('lb-img'),cap=document.getElementById('lb-cap'),
+      cnt=document.getElementById('lb-count'),idx=0;
+  var data=figs.map(function(f){return {src:f.querySelector('img').getAttribute('src'),num:f.getAttribute('data-num')};});
+  function show(i){idx=(i+data.length)%data.length;big.src=data[idx].src;cap.textContent='#'+data[idx].num;cnt.textContent=(idx+1)+' / '+data.length;}
+  function open(i){show(i);ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
+  function close(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+  figs.forEach(function(f,i){
+    f.addEventListener('click',function(){open(i);});
+    f.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open(i);}});
+  });
+  document.getElementById('lb-next').addEventListener('click',function(e){e.stopPropagation();show(idx+1);});
+  document.getElementById('lb-prev').addEventListener('click',function(e){e.stopPropagation();show(idx-1);});
+  document.getElementById('lb-close').addEventListener('click',close);
+  ov.addEventListener('click',function(e){if(e.target===ov||e.target.classList.contains('lb-stage'))close();});
+  document.addEventListener('keydown',function(e){
+    if(!ov.classList.contains('open'))return;
+    if(e.key==='Escape')close();else if(e.key==='ArrowRight')show(idx+1);else if(e.key==='ArrowLeft')show(idx-1);
+  });
+})();
+</script>'''
+
 # ---------------------------------------------------------------- page: home
 def render_home(cats):
     cards = []
     for c in cats:
         first_img = c["items"][0]["img"] if c["items"] else "assets/img/logo.webp"
-        price = f'<div class="price">{price_html(c["old"], c["new"], "ka")}</div>'
-        price_en = f'<div class="price en-price">{price_html(c["old"], c["new"], "en")}</div>'
+        badge = f'<span class="badge">{i18n("ფასდაკლება","Sale")}</span>' if c["old"] else ""
         cards.append(f'''<a class="cat-card" href="category-{c['no']}.html">
-      <div class="cat-thumb"><img loading="lazy" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}"></div>
+      <div class="cat-thumb">{badge}
+        <img loading="lazy" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}">
+      </div>
       <div class="cat-body">
         <span class="cat-type">{i18n(c['type_ka'], c['type_en'])}</span>
-        <span class="cat-no">#{c['no']}</span>
         <div class="price-wrap"><span class="ka">{price_html(c["old"], c["new"], "ka")}</span><span class="en">{price_html(c["old"], c["new"], "en")}</span></div>
-        <span class="cat-size">{esc(c['size'])}</span>
+        <span class="cat-size">{esc(c['size'])} · #{c['no']}</span>
       </div>
     </a>''')
     grid = "\n".join(cards)
     hero = f'''<section class="hero">
     <div class="hero-inner">
+      <span class="hero-over">{i18n("· 25 წლის გამოცდილება ·","· EST. 25 YEARS ·","span")}</span>
       <h1>{i18n("ევროდეკორი","Eurodecor","span")}</h1>
-      <p class="hero-sub">{i18n("შპალერების მაღაზია — პირდაპირ ქარხნიდან","Wallpaper store — factory direct","span")}</p>
-      <p class="hero-usp">{i18n("25 წლის გამოცდილება · საუკეთესო ფასები თბილისში · დიდი არჩევანი","25 years of experience · best prices in Tbilisi · huge selection","span")}</p>
+      <p class="hero-sub">{i18n("შპალერების მაღაზია","Wallpaper Store","span")}</p>
+      <span class="hero-rule"></span>
+      <p class="hero-usp">{i18n("პირდაპირ ქარხნიდან · საუკეთესო ფასები თბილისში · დიდი არჩევანი","Factory-direct · best prices in Tbilisi · huge selection","span")}</p>
     </div>
   </section>'''
     body = f'''{header_html()}
@@ -330,28 +377,40 @@ def render_home(cats):
 def render_category(c):
     items = []
     for it in c["items"]:
-        items.append(f'''<figure class="item">
-      <img loading="lazy" src="{it['img']}" alt="{esc(c['type_en'])} #{it['num']}">
+        items.append(f'''<figure class="item" data-num="{it['num']}" tabindex="0" role="button" aria-label="#{it['num']}">
+      <div class="item-img">
+        <img loading="lazy" src="{it['img']}" alt="{esc(c['type_en'])} #{it['num']}">
+        <span class="zoom">{icon('zoom')}</span>
+      </div>
       <figcaption>#{it['num']}</figcaption>
     </figure>''')
     grid = "\n".join(items) if items else f'<p class="muted">{i18n("ფოტოები მალე","Photos coming soon")}</p>'
 
     d_ka = "".join(f"<li>{esc(x)}</li>" for x in c["desc_ka"])
     d_en = "".join(f"<li>{esc(x)}</li>" for x in c["desc_en"])
+    badge = f'<span class="badge badge-dark">{i18n("ფასდაკლება","Sale")}</span>' if c["old"] else ""
 
     intro = f'''<section class="cat-head">
-    <div class="cat-head-info">
-      <span class="crumb"><a href="index.html">{i18n("მთავარი","Home")}</a> / #{c['no']}</span>
-      <h1>{i18n(c['type_ka'], c['type_en'],"span")} <span class="hno">#{c['no']}</span></h1>
-      <div class="cat-price">{price_html(c['old'], c['new'], 'ka') if True else ''}
-        <span class="ka">{price_html(c['old'], c['new'], 'ka')}</span><span class="en">{price_html(c['old'], c['new'], 'en')}</span>
-      </div>
-      <p class="cat-size-big">{esc(c['size'])}</p>
-      <ul class="feat ka">{d_ka}</ul>
-      <ul class="feat en">{d_en}</ul>
-      <p class="order-hint">{i18n("მოგწონთ რომელიმე? მოგვწერეთ ნომერი (მაგ. #"+c['no']+"01) Messenger-ში ან WhatsApp-ში.","Like one? Message us the number (e.g. #"+c['no']+"01) on Messenger or WhatsApp.")}</p>
+    <nav class="crumb"><a href="index.html">{i18n("მთავარი","Home")}</a> <span>/</span> #{c['no']}</nav>
+    <span class="cat-over">{i18n(c['type_ka'], c['type_en'])} · #{c['no']}</span>
+    <h1 class="cat-title">{i18n(c['type_ka'], c['type_en'],"span")}</h1>
+    <div class="cat-price">{badge}
+      <span class="ka">{price_html(c['old'], c['new'], 'ka')}</span><span class="en">{price_html(c['old'], c['new'], 'en')}</span>
     </div>
+    <p class="cat-size-big">{esc(c['size'])}</p>
+    <ul class="feat ka">{d_ka}</ul>
+    <ul class="feat en">{d_en}</ul>
+    <p class="order-hint">{i18n("მოგწონთ რომელიმე? მოგვწერეთ ნომერი (მაგ. #"+c['no']+"01) Messenger-ში ან WhatsApp-ში.","Like one? Message us the number (e.g. #"+c['no']+"01) on Messenger or WhatsApp.")}</p>
   </section>'''
+
+    lightbox = f'''<div class="lb" id="lb" aria-hidden="true">
+  <button class="lb-close" id="lb-close" aria-label="Close">{icon('close', 26)}</button>
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">{icon('chevL', 30)}</button>
+  <figure class="lb-stage"><img id="lb-img" src="" alt=""></figure>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next">{icon('chevR', 30)}</button>
+  <div class="lb-bar"><span id="lb-cap"></span><span id="lb-count"></span></div>
+</div>'''
+
     body = f'''{header_html()}
 {contact_bar()}
 <main class="container">
@@ -362,7 +421,9 @@ def render_category(c):
   <p class="back"><a href="index.html">← {i18n("ყველა კატეგორია","All categories")}</a></p>
 </main>
 {footer_html()}
-{LANG_JS}'''
+{lightbox}
+{LANG_JS}
+{LIGHTBOX_JS}'''
     title_ka = f"{c['type_ka']} #{c['no']} — ევროდეკორი"
     title_en = f"{c['type_en']} #{c['no']} — Eurodecor"
     desc = f"{c['type_ka']} #{c['no']}, {c['size']} — ევროდეკორი, თბილისი. საუკეთესო ფასი."
@@ -376,22 +437,27 @@ def render_category(c):
 # ---------------------------------------------------------------- CSS
 def write_css():
     css = f''':root{{
-  --primary:{C_PRIMARY};
-  --primary-d:#33143f;
-  --second:{C_SECOND};
-  --cream:#f6f1ee;
-  --ink:#241a2b;
-  --muted:#7a6f80;
-  --line:#e7ddd6;
-  --radius:16px;
-  --shadow:0 6px 24px rgba(70,28,93,.10);
+  --plum:{C_PRIMARY};
+  --plum-d:#2c1140;
+  --plum-2:#5b2a72;
+  --taupe:{C_SECOND};
+  --taupe-l:#e6ddd6;
+  --ivory:#faf7f4;
+  --ink:#2a2230;
+  --muted:#8a7f92;
+  --gold:#b08d57;
+  --sale:#8d2846;
+  --line:rgba(70,28,93,.12);
+  --serif:'Playfair Display','Noto Serif Georgian',Georgia,serif;
+  --sans:'Noto Sans Georgian','Segoe UI',system-ui,-apple-system,sans-serif;
 }}
 *{{box-sizing:border-box}}
 html{{-webkit-text-size-adjust:100%}}
-body{{margin:0;font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans Georgian',sans-serif;color:var(--ink);background:var(--cream);line-height:1.5}}
+body{{margin:0;font-family:var(--sans);color:var(--ink);background:var(--ivory);line-height:1.55}}
 img{{max-width:100%;display:block}}
 a{{color:inherit;text-decoration:none}}
-.container{{max-width:1120px;margin:0 auto;padding:0 18px}}
+.ic{{flex:none}}
+.container{{max-width:1160px;margin:0 auto;padding:0 22px}}
 
 /* language toggle */
 html[data-lang="ka"] .en{{display:none !important}}
@@ -399,82 +465,127 @@ html[data-lang="en"] .ka{{display:none !important}}
 
 /* header */
 .site-header{{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
-  padding:10px 18px;background:var(--primary);color:#fff;box-shadow:var(--shadow)}}
-.brand{{display:flex;align-items:center;gap:10px}}
-.brand-logo{{height:40px;width:auto;background:#fff;border-radius:8px;padding:3px}}
+  padding:12px 22px;background:rgba(250,247,244,.9);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);color:var(--plum)}}
+.brand{{display:flex;align-items:center;gap:11px}}
+.brand-logo{{height:42px;width:auto;background:#fff;border-radius:9px;padding:4px;box-shadow:0 2px 8px rgba(70,28,93,.08)}}
 .brand-text{{display:flex;flex-direction:column;line-height:1.05}}
-.brand-text strong{{font-size:1.15rem;letter-spacing:.3px}}
-.brand-text small{{font-size:.72rem;opacity:.85}}
-.lang-btn{{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);
-  padding:7px 14px;border-radius:999px;font-weight:600;cursor:pointer;font-size:.85rem}}
-.lang-btn:hover{{background:rgba(255,255,255,.28)}}
+.brand-text strong{{font-family:var(--serif);font-size:1.28rem;font-weight:700;letter-spacing:.3px;color:var(--plum)}}
+.brand-text small{{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:2px}}
+.lang-btn{{background:transparent;color:var(--plum);border:1px solid var(--plum);
+  padding:7px 16px;border-radius:999px;font-weight:600;cursor:pointer;font-size:.82rem;letter-spacing:.05em;transition:.16s}}
+.lang-btn:hover{{background:var(--plum);color:#fff}}
 
 /* hero */
-.hero{{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;text-align:center;padding:52px 18px 46px}}
-.hero h1{{margin:0;font-size:2.5rem;letter-spacing:.5px}}
-.hero-sub{{margin:.5rem 0 .4rem;font-size:1.15rem;color:var(--second)}}
-.hero-usp{{margin:0;opacity:.9;font-size:.95rem}}
+.hero{{background:radial-gradient(130% 150% at 50% -30%,var(--plum-2) 0%,var(--plum) 46%,var(--plum-d) 100%);
+  color:#fff;text-align:center;padding:78px 20px 68px}}
+.hero-over{{display:block;letter-spacing:.34em;text-transform:uppercase;font-size:.72rem;color:var(--taupe);font-weight:600}}
+.hero h1{{font-family:var(--serif);font-weight:600;font-size:clamp(2.7rem,6vw,4.1rem);margin:.35rem 0 0;letter-spacing:.5px}}
+.hero-sub{{font-family:var(--serif);font-style:italic;color:var(--taupe);font-size:clamp(1.1rem,2.4vw,1.4rem);margin:.35rem 0 0}}
+.hero-rule{{display:block;width:72px;height:2px;margin:22px auto;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}}
+.hero-usp{{color:rgba(255,255,255,.82);font-size:.96rem;letter-spacing:.02em;margin:0}}
 
 /* contact bar */
-.contact-bar{{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 12px;background:var(--second)}}
-.cbtn{{display:inline-flex;align-items:center;gap:7px;background:#fff;color:var(--primary);
-  padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;box-shadow:var(--shadow)}}
-.cbtn:hover{{transform:translateY(-1px)}}
+.contact-bar{{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:22px 14px;background:var(--ivory)}}
+.cbtn{{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--plum);
+  padding:11px 20px;border-radius:999px;border:1px solid var(--line);font-weight:600;font-size:.92rem;
+  box-shadow:0 2px 10px rgba(70,28,93,.05);transition:.18s}}
+.cbtn:hover{{background:var(--plum);color:#fff;border-color:var(--plum);transform:translateY(-2px);box-shadow:0 12px 24px rgba(70,28,93,.18)}}
 .cbtn span{{white-space:nowrap}}
 
 /* section */
-.section-title{{text-align:center;margin:34px 0 6px;font-size:1.5rem;color:var(--primary)}}
+.section-title{{font-family:var(--serif);text-align:center;margin:50px 0 2px;font-size:2rem;font-weight:600;color:var(--plum)}}
+.section-title::after{{content:"";display:block;width:56px;height:2px;margin:14px auto 0;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}}
 
 /* category grid */
-.cat-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;margin:22px 0 40px}}
-.cat-card{{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
-  box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}}
-.cat-card:hover{{transform:translateY(-3px);box-shadow:0 12px 30px rgba(70,28,93,.16)}}
-.cat-thumb{{aspect-ratio:3/4;overflow:hidden;background:var(--second)}}
-.cat-thumb img{{width:100%;height:100%;object-fit:cover}}
-.cat-body{{padding:12px 14px 16px;position:relative}}
-.cat-type{{font-weight:700;color:var(--primary);display:block}}
-.cat-no{{position:absolute;top:12px;right:14px;font-size:.78rem;color:var(--muted)}}
-.cat-size{{display:block;color:var(--muted);font-size:.82rem;margin-top:4px}}
-.price-wrap{{margin-top:6px}}
-.old{{text-decoration:line-through;color:var(--muted);margin-right:8px;font-size:.9rem}}
-.new{{color:#b0163b;font-weight:800;font-size:1.15rem}}
-.ptag{{font-size:.7rem;background:var(--primary);color:#fff;padding:2px 7px;border-radius:999px;vertical-align:middle}}
+.cat-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px;margin:32px 0 64px}}
+.cat-card{{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:0 4px 18px rgba(70,28,93,.06);transition:transform .2s,box-shadow .2s}}
+.cat-card:hover{{transform:translateY(-4px);box-shadow:0 20px 42px rgba(70,28,93,.15)}}
+.cat-thumb{{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--taupe-l)}}
+.cat-thumb img{{width:100%;height:100%;object-fit:cover;transition:transform .55s ease}}
+.cat-card:hover .cat-thumb img{{transform:scale(1.06)}}
+.badge{{position:absolute;top:12px;left:12px;z-index:2;background:var(--gold);color:#fff;
+  font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:5px 11px;border-radius:999px}}
+.cat-body{{padding:16px 18px 20px}}
+.cat-type{{display:block;font-weight:600;color:var(--ink);font-size:1.04rem}}
+.price-wrap{{margin:9px 0 5px}}
+.old{{text-decoration:line-through;color:var(--muted);margin-right:9px;font-size:.95rem}}
+.new{{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.45rem}}
+.ptag{{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#fff;
+  padding:3px 8px;border-radius:999px;vertical-align:middle;margin-left:7px}}
+.cat-size{{display:block;color:var(--muted);font-size:.82rem;margin-top:6px;letter-spacing:.03em}}
 
 /* category page */
-.cat-head{{margin:26px 0 10px}}
-.crumb{{color:var(--muted);font-size:.85rem}}
-.crumb a{{color:var(--primary)}}
-.cat-head h1{{margin:.3rem 0;color:var(--primary);font-size:1.9rem}}
-.hno{{color:var(--muted);font-weight:500;font-size:1.1rem}}
-.cat-price{{font-size:1.2rem;margin:.2rem 0}}
-.cat-size-big{{color:var(--muted);margin:.2rem 0 .6rem}}
-.feat{{margin:.4rem 0 .6rem;padding-left:1.1rem;color:#3d2f45}}
-.feat li{{margin:.2rem 0}}
-.order-hint{{background:#fff;border:1px dashed var(--second);border-radius:12px;padding:10px 14px;color:#4a3a52;font-size:.92rem}}
+.cat-head{{max-width:760px;margin:36px auto 8px;text-align:center}}
+.crumb{{color:var(--muted);font-size:.84rem}}
+.crumb a{{color:var(--plum)}}
+.crumb span{{margin:0 5px;opacity:.6}}
+.cat-over{{display:block;letter-spacing:.28em;text-transform:uppercase;font-size:.72rem;color:var(--gold);font-weight:700;margin-top:16px}}
+.cat-title{{font-family:var(--serif);color:var(--plum);font-size:clamp(1.9rem,4vw,2.7rem);margin:.25rem 0 .3rem;font-weight:600}}
+.cat-price{{font-family:var(--serif);font-size:1.55rem;margin:.3rem 0;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}}
+.badge-dark{{font-family:var(--sans);background:var(--sale);color:#fff;font-size:.64rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:5px 11px;border-radius:999px;font-weight:700}}
+.cat-size-big{{color:var(--muted);margin:.1rem 0 1.1rem;letter-spacing:.04em}}
+.feat{{list-style:none;padding:0;margin:0 auto 1.2rem;display:inline-block;text-align:left}}
+.feat li{{position:relative;padding-left:26px;margin:.44rem 0;color:#40354a}}
+.feat li::before{{content:"";position:absolute;left:4px;top:.15em;width:6px;height:11px;
+  border:solid var(--gold);border-width:0 2px 2px 0;transform:rotate(45deg)}}
+.order-hint{{max-width:560px;margin:8px auto 0;background:#fff;border:1px solid var(--taupe);
+  border-radius:12px;padding:12px 18px;color:#4a3a52;font-size:.92rem}}
 
-.item-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin:18px 0 30px}}
-.item{{margin:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}}
-.item img{{aspect-ratio:3/4;width:100%;object-fit:cover;background:var(--second)}}
-.item figcaption{{text-align:center;padding:8px;font-weight:700;color:var(--primary)}}
-.back{{margin:10px 0 40px}}
-.back a{{color:var(--primary);font-weight:600}}
-.muted{{color:var(--muted)}}
+/* item grid + lightbox trigger */
+.item-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;margin:28px 0 36px}}
+.item{{margin:0;cursor:pointer;outline:none}}
+.item-img{{position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden;background:var(--taupe-l);
+  border:1px solid var(--line);box-shadow:0 4px 16px rgba(70,28,93,.07)}}
+.item-img img{{width:100%;height:100%;object-fit:cover;transition:transform .45s}}
+.item:hover .item-img img,.item:focus .item-img img{{transform:scale(1.07)}}
+.zoom{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;
+  background:rgba(44,17,64,.3);opacity:0;transition:.2s}}
+.item:hover .zoom,.item:focus-visible .zoom{{opacity:1}}
+.item figcaption{{text-align:center;padding:9px 0 0;font-weight:600;color:var(--plum);font-size:.9rem;letter-spacing:.05em}}
+.back{{margin:6px 0 44px}}
+.back a{{color:var(--plum);font-weight:600}}
+.muted{{color:var(--muted);text-align:center}}
 
 /* footer */
-.site-footer{{background:var(--primary-d);color:#e9e2ee;margin-top:30px;padding:34px 18px 20px}}
-.foot-grid{{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px}}
-.foot-logo{{height:44px;background:#fff;border-radius:8px;padding:4px;width:auto}}
-.foot-tag{{color:var(--second);margin-top:10px;font-size:.9rem}}
-.site-footer h4{{color:#fff;margin:0 0 8px}}
-.site-footer a{{color:var(--second)}}
-.site-footer p{{margin:.3rem 0;font-size:.92rem}}
-.copyright{{text-align:center;color:#a892b5;margin-top:24px;font-size:.82rem}}
+.site-footer{{background:var(--plum-d);color:#e7dcee;margin-top:24px;padding:48px 22px 26px}}
+.foot-grid{{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:30px}}
+.foot-logo{{height:48px;background:#fff;border-radius:9px;padding:5px;width:auto}}
+.foot-tag{{color:var(--taupe);margin-top:12px;font-size:.9rem;max-width:230px}}
+.site-footer h4{{font-family:var(--serif);color:#fff;margin:0 0 10px;font-weight:600;font-size:1.08rem}}
+.site-footer a{{color:var(--taupe);transition:.15s}}
+.site-footer a:hover{{color:#fff}}
+.site-footer p{{margin:.35rem 0;font-size:.92rem}}
+.copyright{{text-align:center;color:#a58cb8;margin-top:32px;font-size:.8rem;letter-spacing:.04em}}
+
+/* lightbox */
+.lb{{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+  background:rgba(22,9,31,.95);padding:20px}}
+.lb.open{{display:flex}}
+.lb-stage{{margin:0;display:flex;align-items:center;justify-content:center}}
+.lb-stage img{{max-width:92vw;max-height:82vh;object-fit:contain;border-radius:6px;box-shadow:0 24px 70px rgba(0,0,0,.65)}}
+.lb-close{{position:absolute;top:16px;right:18px;width:46px;height:46px}}
+.lb-nav{{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:54px}}
+.lb-prev{{left:16px}}.lb-next{{right:16px}}
+.lb-close,.lb-nav{{display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;
+  color:#fff;background:rgba(255,255,255,.1);border-radius:50%;transition:.15s}}
+.lb-close:hover,.lb-nav:hover{{background:rgba(255,255,255,.26)}}
+.lb-bar{{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:18px;
+  color:#fff;font-size:.95rem;letter-spacing:.05em}}
+#lb-cap{{font-weight:700;color:var(--taupe)}}
 
 @media(max-width:560px){{
-  .hero h1{{font-size:2rem}}
+  .hero{{padding:58px 18px 50px}}
   .cbtn span{{display:none}}
-  .cbtn{{padding:11px 15px;font-size:1.1rem}}
+  .cbtn{{padding:12px}}
+  .cat-grid{{gap:16px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+  .item-grid{{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}}
+  .lb-nav{{width:44px;height:44px}}
+  .lb-prev{{left:8px}}.lb-next{{right:8px}}
 }}
 '''
     with open(os.path.join(OUT, "styles.css"), "w", encoding="utf-8") as f:
