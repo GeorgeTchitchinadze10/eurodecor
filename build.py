@@ -345,9 +345,14 @@ LIGHTBOX_JS = '''<script>
   var big=document.getElementById('lb-img'),cap=document.getElementById('lb-cap'),
       cnt=document.getElementById('lb-count'),idx=0;
   var data=figs.map(function(f){return {src:f.querySelector('img').getAttribute('src'),num:f.getAttribute('data-num')};});
-  function show(i){idx=(i+data.length)%data.length;big.src=data[idx].src;cap.textContent='#'+data[idx].num;cnt.textContent=(idx+1)+' / '+data.length;}
+  var scale=1,tx=0,ty=0;
+  function apply(anim){big.style.transition=anim?'transform .22s ease':'';big.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';}
+  function reset(){scale=1;tx=0;ty=0;apply(false);}
+  function clampPan(){var mx=(scale-1)*big.clientWidth/2,my=(scale-1)*big.clientHeight/2;
+    tx=Math.max(-mx,Math.min(mx,tx));ty=Math.max(-my,Math.min(my,ty));}
+  function show(i){idx=(i+data.length)%data.length;big.src=data[idx].src;cap.textContent='#'+data[idx].num;cnt.textContent=(idx+1)+' / '+data.length;reset();}
   function open(i){show(i);ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
-  function close(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+  function close(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';reset();}
   figs.forEach(function(f,i){
     f.addEventListener('click',function(){open(i);});
     f.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open(i);}});
@@ -359,6 +364,35 @@ LIGHTBOX_JS = '''<script>
   document.addEventListener('keydown',function(e){
     if(!ov.classList.contains('open'))return;
     if(e.key==='Escape')close();else if(e.key==='ArrowRight')show(idx+1);else if(e.key==='ArrowLeft')show(idx-1);
+  });
+  // ---- touch gestures: pinch-zoom, pan, double-tap, swipe ----
+  var mode=null,startDist=0,startScale=1,sx=0,sy=0,stx=0,sty=0,dx=0,lastTap=0;
+  function dist(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);}
+  big.addEventListener('touchstart',function(e){
+    if(e.touches.length===2){mode='pinch';startDist=dist(e.touches);startScale=scale;e.preventDefault();return;}
+    var t=e.touches[0],now=Date.now();
+    if(now-lastTap<300){ // double-tap toggles zoom
+      if(scale>1){reset();}else{scale=2.5;tx=0;ty=0;apply(true);}
+      lastTap=0;e.preventDefault();return;
+    }
+    lastTap=now;
+    if(scale>1){mode='pan';sx=t.clientX;sy=t.clientY;stx=tx;sty=ty;}
+    else{mode='swipe';sx=t.clientX;dx=0;big.style.transition='';}
+  },{passive:false});
+  big.addEventListener('touchmove',function(e){
+    if(mode==='pinch'&&e.touches.length===2){
+      scale=Math.min(4,Math.max(1,startScale*dist(e.touches)/startDist));clampPan();apply(false);e.preventDefault();return;}
+    var t=e.touches[0];if(!t)return;
+    if(mode==='pan'){tx=stx+(t.clientX-sx);ty=sty+(t.clientY-sy);clampPan();apply(false);e.preventDefault();}
+    else if(mode==='swipe'){dx=t.clientX-sx;if(Math.abs(dx)>6)e.preventDefault();big.style.transform='translateX('+dx+'px)';}
+  },{passive:false});
+  big.addEventListener('touchend',function(){
+    if(mode==='pinch'){if(scale<=1.03)reset();mode=null;return;}
+    if(mode==='swipe'){
+      if(dx<-55)show(idx+1);else if(dx>55)show(idx-1);
+      else{big.style.transition='transform .22s ease';big.style.transform='translateX(0)';}
+    }
+    mode=null;
   });
 })();
 </script>'''
@@ -455,6 +489,7 @@ def render_category(c):
   <figure class="lb-stage"><img id="lb-img" src="" alt=""></figure>
   <button class="lb-nav lb-next" id="lb-next" aria-label="Next">{icon('chevR', 30)}</button>
   <div class="lb-bar"><span id="lb-cap"></span><span id="lb-count"></span></div>
+  <span class="lb-hint">{i18n("გადაფურცლეთ · ორმაგი შეხება ზუმისთვის","Swipe · double-tap to zoom")}</span>
 </div>'''
 
     body = f'''{header_html()}
@@ -650,7 +685,8 @@ html[data-lang="en"] .ka{{display:none !important}}
   background:rgba(22,9,31,.95);padding:20px}}
 .lb.open{{display:flex}}
 .lb-stage{{margin:0;display:flex;align-items:center;justify-content:center}}
-.lb-stage img{{max-width:92vw;max-height:82vh;object-fit:contain;border-radius:6px;box-shadow:0 24px 70px rgba(0,0,0,.65)}}
+.lb-stage img{{max-width:92vw;max-height:82vh;object-fit:contain;border-radius:6px;box-shadow:0 24px 70px rgba(0,0,0,.65);
+  touch-action:none;transform-origin:center center;will-change:transform;-webkit-user-select:none;user-select:none}}
 .lb-close{{position:absolute;top:16px;right:18px;width:46px;height:46px}}
 .lb-nav{{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:54px}}
 .lb-prev{{left:16px}}.lb-next{{right:16px}}
@@ -660,6 +696,9 @@ html[data-lang="en"] .ka{{display:none !important}}
 .lb-bar{{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:18px;
   color:#fff;font-size:.95rem;letter-spacing:.05em}}
 #lb-cap{{font-weight:700;color:var(--taupe)}}
+.lb-hint{{display:none;position:absolute;top:16px;left:0;right:0;text-align:center;
+  color:rgba(255,255,255,.62);font-size:.78rem;letter-spacing:.05em;pointer-events:none}}
+@media(hover:none) and (pointer:coarse){{.lb-hint{{display:block}}}}
 
 @media(max-width:820px){{
   .hero-grid{{grid-template-columns:1fr;min-height:0}}
