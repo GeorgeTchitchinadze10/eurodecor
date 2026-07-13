@@ -14,6 +14,7 @@ from PIL import Image, ImageOps
 ROOT     = r"D:\Eurodecor"
 XLSX     = os.path.join(ROOT, "Eurodecor - Catalog.xlsx")
 LOGO_SRC = os.path.join(ROOT, "Eurodecor logo.jpg")
+COVER_SRC = os.path.join(ROOT, "Eurodecor cover.png")
 HERE     = os.path.dirname(os.path.abspath(__file__))
 OUT      = os.path.join(HERE, "docs")
 IMG_OUT  = os.path.join(OUT, "assets", "img")
@@ -122,17 +123,29 @@ def optimize(src, dst, maxw=1100, quality=80):
         im = im.resize((maxw, round(h * maxw / w)), Image.LANCZOS)
     im.save(dst, "WEBP", quality=quality, method=6)
 
-def optimize_logo(src, dst, maxw=420):
-    if os.path.exists(dst):
-        return
+def optimize_logo(src, dst, maxw=420, box=None):
     im = Image.open(src)
     im = ImageOps.exif_transpose(im)
+    if box:
+        im = im.crop(box)
     if im.mode != "RGBA":
         im = im.convert("RGBA")
     w, h = im.size
     if w > maxw:
         im = im.resize((maxw, round(h * maxw / w)), Image.LANCZOS)
     im.save(dst, "WEBP", quality=90, method=6)
+
+def optimize_cover(src, dst, box=None, maxw=1240, q=84):
+    """Crop the product scene out of the Facebook cover for the hero art."""
+    im = Image.open(src)
+    im = ImageOps.exif_transpose(im)
+    if box:
+        im = im.crop(box)
+    im = im.convert("RGB")
+    w, h = im.size
+    if w > maxw:
+        im = im.resize((maxw, round(h * maxw / w)), Image.LANCZOS)
+    im.save(dst, "WEBP", quality=q, method=6)
 
 # ---------------------------------------------------------------- read catalog
 def read_categories():
@@ -221,6 +234,25 @@ def icon(name, size=20):
             f'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
             f'stroke-linejoin="round" aria-hidden="true">{ICON_PATHS[name]}</svg>')
 
+# a single gold leaf (used in the line·leaf·line divider that echoes the logo lockup)
+LEAF_SVG = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+            '<path d="M12 2C7.5 6 6 11.5 9 17c.6 1.1 1.7 2.4 3 5 1.3-2.6 2.4-3.9 3-5 3-5.5 1.5-11-3-15z"/>'
+            '<path d="M12 6v11" stroke="rgba(0,0,0,.18)" stroke-width="1" fill="none"/></svg>')
+
+def leaf_div(center=False, light=False):
+    cls = "leaf-div" + (" center" if center else "") + (" light" if light else "")
+    return f'<span class="{cls}"><i></i>{LEAF_SVG}<i></i></span>'
+
+# a laurel sprig used as a faint corner flourish in the hero
+def sprig_svg(cls="hero-sprig"):
+    stem = '<path d="M100 22V184" stroke="currentColor" stroke-width="2.2" fill="none"/>'
+    leaves = []
+    for y in (46, 72, 98, 124, 150):
+        leaves.append(f'<path d="M100 {y}c14-13 34-14 46-6-12 12-32 12-46 6z"/>')
+        leaves.append(f'<path d="M100 {y+12}c-14-13-34-14-46-6 12 12 32 12 46 6z"/>')
+    return (f'<svg class="{cls}" viewBox="0 0 200 200" fill="currentColor" aria-hidden="true">'
+            f'{stem}{"".join(leaves)}</svg>')
+
 def head(title_ka, title_en, desc_ka, canonical):
     ld = f'''{{
       "@context":"https://schema.org","@type":"HomeGoodsStore",
@@ -247,9 +279,9 @@ def head(title_ka, title_en, desc_ka, canonical):
 def header_html():
     return f'''<header class="site-header">
   <a class="brand" href="index.html">
-    <img src="assets/img/logo.webp" alt="Eurodecor" class="brand-logo">
+    <span class="brand-mark"><img src="assets/img/mark.webp" alt="Eurodecor"></span>
     <span class="brand-text">
-      <strong>Eurodecor</strong>
+      <strong>{i18n("ევროდეკორი","Eurodecor","span")}</strong>
       {i18n("შპალერების მაღაზია","Wallpaper Store", "small")}
     </span>
   </a>
@@ -273,7 +305,7 @@ def footer_html():
     return f'''<footer class="site-footer">
   <div class="foot-grid">
     <div>
-      <img src="assets/img/logo.webp" alt="Eurodecor" class="foot-logo">
+      <span class="foot-mark"><img src="assets/img/mark.webp" alt="Eurodecor"></span>
       <p class="foot-tag">{i18n("პირდაპირ ქარხნიდან · 25 წლიანი გამოცდილება","Factory-direct · 25 years of experience","span")}</p>
     </div>
     <div>
@@ -349,19 +381,28 @@ def render_home(cats):
     </a>''')
     grid = "\n".join(cards)
     hero = f'''<section class="hero">
-    <div class="hero-inner">
-      <span class="hero-over">{i18n("· 25 წლიანი გამოცდილება ·","· EST. 25 YEARS ·","span")}</span>
-      <h1>{i18n("ევროდეკორი","Eurodecor","span")}</h1>
-      <p class="hero-sub">{i18n("შპალერების მაღაზია","Wallpaper Store","span")}</p>
-      <span class="hero-rule"></span>
-      <p class="hero-usp">{i18n("პირდაპირ ქარხნიდან · საუკეთესო ფასები თბილისში · დიდი არჩევანი","Factory-direct · best prices in Tbilisi · huge selection","span")}</p>
+    {sprig_svg()}
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-over">{i18n("· 25 წლიანი გამოცდილება ·","· EST. 25 YEARS ·","span")}</span>
+        <h1>{i18n("ევროდეკორი","Eurodecor","span")}</h1>
+        {leaf_div(light=True)}
+        <p class="hero-sub">{i18n("შპალერების მაღაზია","Wallpaper Store","span")}</p>
+        <p class="hero-usp">{i18n("პირდაპირ ქარხნიდან · საუკეთესო ფასები თბილისში · დიდი არჩევანი","Factory-direct · best prices in Tbilisi · huge selection","span")}</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold" href="https://wa.me/{esc(BIZ['whatsapp'])}" target="_blank" rel="noopener">{icon('chat')}<span>{i18n("მოგვწერეთ","Message us")}</span></a>
+          <a class="btn btn-ghost" href="#categories">{i18n("კატალოგის ნახვა","Browse catalog")}</a>
+        </div>
+      </div>
+      <div class="hero-art"><img src="assets/img/hero.webp" alt="{i18n('ევროდეკორის შპალერები','Eurodecor wallpapers')}"></div>
     </div>
   </section>'''
     body = f'''{header_html()}
 {hero}
 {contact_bar()}
 <main class="container">
-  <h2 class="section-title">{i18n("კატეგორიები","Categories","span")}</h2>
+  <h2 class="section-title" id="categories">{i18n("კატეგორიები","Categories","span")}</h2>
+  {leaf_div(center=True)}
   <div class="cat-grid">
     {grid}
   </div>
@@ -398,6 +439,7 @@ def render_category(c):
     <nav class="crumb"><a href="index.html">{i18n("მთავარი","Home")}</a> <span>/</span> #{c['no']}</nav>
     <span class="cat-over">{i18n(c['type_ka'], c['type_en'])} · #{c['no']}</span>
     <h1 class="cat-title">{i18n(c['type_ka'], c['type_en'],"span")}</h1>
+    {leaf_div(center=True)}
     <div class="cat-price">{badge}
       <span class="ka">{price_html(c['old'], c['new'], 'ka')}</span><span class="en">{price_html(c['old'], c['new'], 'en')}</span>
     </div>
@@ -442,22 +484,25 @@ def render_category(c):
 def write_css():
     css = f''':root{{
   --plum:{C_PRIMARY};
-  --plum-d:#2c1140;
-  --plum-2:#5b2a72;
+  --royal:#5a2288;
+  --royal-2:#712fa6;
+  --plum-d:#2a0f3e;
   --taupe:{C_SECOND};
   --taupe-l:#e6ddd6;
-  --ivory:#faf7f4;
-  --ink:#2a2230;
+  --cream:#f5efe7;
+  --cream-2:#efe6da;
+  --ink:#2c2333;
   --muted:#8a7f92;
-  --gold:#b08d57;
+  --gold:#c2a15c;
+  --gold-l:#e4cf95;
   --sale:#8d2846;
   --line:rgba(70,28,93,.12);
   --serif:'Playfair Display','Noto Serif Georgian',Georgia,serif;
   --sans:'Noto Sans Georgian','Segoe UI',system-ui,-apple-system,sans-serif;
 }}
 *{{box-sizing:border-box}}
-html{{-webkit-text-size-adjust:100%}}
-body{{margin:0;font-family:var(--sans);color:var(--ink);background:var(--ivory);line-height:1.55}}
+html{{-webkit-text-size-adjust:100%;scroll-behavior:smooth}}
+body{{margin:0;font-family:var(--sans);color:var(--ink);background:var(--cream);line-height:1.55}}
 img{{max-width:100%;display:block}}
 a{{color:inherit;text-decoration:none}}
 .ic{{flex:none}}
@@ -467,31 +512,57 @@ a{{color:inherit;text-decoration:none}}
 html[data-lang="ka"] .en{{display:none !important}}
 html[data-lang="en"] .ka{{display:none !important}}
 
+/* gold leaf divider (echoes the logo lockup) */
+.leaf-div{{display:flex;align-items:center;gap:12px;margin:16px 0}}
+.leaf-div.center{{justify-content:center;margin:14px 0 4px}}
+.leaf-div i{{display:block;height:1px;width:44px;background:linear-gradient(90deg,transparent,var(--gold))}}
+.leaf-div i:last-child{{background:linear-gradient(90deg,var(--gold),transparent)}}
+.leaf-div svg{{width:16px;height:16px;color:var(--gold);flex:none}}
+.leaf-div.light svg{{color:var(--gold-l)}}
+.leaf-div.light i{{background:linear-gradient(90deg,transparent,rgba(228,207,149,.9))}}
+.leaf-div.light i:last-child{{background:linear-gradient(90deg,rgba(228,207,149,.9),transparent)}}
+
 /* header */
 .site-header{{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
-  padding:12px 22px;background:rgba(250,247,244,.9);backdrop-filter:blur(10px);
+  padding:11px 22px;background:rgba(245,239,231,.88);backdrop-filter:blur(10px);
   border-bottom:1px solid var(--line);color:var(--plum)}}
-.brand{{display:flex;align-items:center;gap:11px}}
-.brand-logo{{height:42px;width:auto;background:#fff;border-radius:9px;padding:4px;box-shadow:0 2px 8px rgba(70,28,93,.08)}}
+.brand{{display:flex;align-items:center;gap:12px}}
+.brand-mark{{display:block;width:46px;height:46px;border-radius:12px;overflow:hidden;flex:none;
+  box-shadow:0 4px 12px rgba(70,28,93,.22)}}
+.brand-mark img{{width:100%;height:100%;object-fit:cover}}
 .brand-text{{display:flex;flex-direction:column;line-height:1.05}}
-.brand-text strong{{font-family:var(--serif);font-size:1.28rem;font-weight:700;letter-spacing:.3px;color:var(--plum)}}
-.brand-text small{{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:2px}}
+.brand-text strong{{font-family:var(--serif);font-size:1.3rem;font-weight:700;letter-spacing:.3px;color:var(--plum)}}
+.brand-text small{{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:3px}}
 .lang-btn{{background:transparent;color:var(--plum);border:1px solid var(--plum);
   padding:7px 16px;border-radius:999px;font-weight:600;cursor:pointer;font-size:.82rem;letter-spacing:.05em;transition:.16s}}
 .lang-btn:hover{{background:var(--plum);color:#fff}}
 
 /* hero */
-.hero{{background:radial-gradient(130% 150% at 50% -30%,var(--plum-2) 0%,var(--plum) 46%,var(--plum-d) 100%);
-  color:#fff;text-align:center;padding:78px 20px 68px}}
-.hero-over{{display:block;letter-spacing:.34em;text-transform:uppercase;font-size:.72rem;color:var(--taupe);font-weight:600}}
-.hero h1{{font-family:var(--serif);font-weight:600;font-size:clamp(2.7rem,6vw,4.1rem);margin:.35rem 0 0;letter-spacing:.5px}}
-.hero-sub{{font-family:var(--serif);font-style:italic;color:var(--taupe);font-size:clamp(1.1rem,2.4vw,1.4rem);margin:.35rem 0 0}}
-.hero-rule{{display:block;width:72px;height:2px;margin:22px auto;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent)}}
-.hero-usp{{color:rgba(255,255,255,.82);font-size:.96rem;letter-spacing:.02em;margin:0}}
+.hero{{position:relative;overflow:hidden;color:#fff;
+  background:linear-gradient(120deg,#39144f 0%,var(--royal) 52%,#45206c 100%)}}
+.hero-grid{{position:relative;z-index:2;max-width:1220px;margin:0 auto;
+  display:grid;grid-template-columns:1.02fr .98fr;align-items:stretch;min-height:clamp(380px,50vw,540px)}}
+.hero-copy{{align-self:center;padding:54px clamp(22px,4vw,60px)}}
+.hero-over{{display:block;letter-spacing:.32em;text-transform:uppercase;font-size:.72rem;color:var(--gold-l);font-weight:600}}
+.hero h1{{font-family:var(--serif);font-weight:600;font-size:clamp(2.6rem,5.4vw,4rem);margin:.4rem 0 0;letter-spacing:.5px;line-height:1.05}}
+.hero-sub{{font-family:var(--serif);font-style:italic;color:var(--taupe);font-size:clamp(1.1rem,2.3vw,1.5rem);margin:.2rem 0 0}}
+.hero-usp{{color:rgba(255,255,255,.85);font-size:1rem;letter-spacing:.02em;margin:14px 0 0;max-width:30em}}
+.hero-cta{{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}}
+.btn{{display:inline-flex;align-items:center;gap:9px;padding:13px 26px;border-radius:999px;
+  font-weight:600;font-size:.96rem;transition:.18s;cursor:pointer}}
+.btn-gold{{background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#3a2410;
+  box-shadow:0 10px 26px rgba(0,0,0,.28)}}
+.btn-gold:hover{{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.34)}}
+.btn-ghost{{border:1px solid rgba(255,255,255,.55);color:#fff}}
+.btn-ghost:hover{{background:rgba(255,255,255,.12);border-color:#fff}}
+.hero-art{{position:relative;align-self:stretch;min-height:260px}}
+.hero-art img{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 10%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 10%)}}
+.hero-sprig{{position:absolute;left:-26px;bottom:-40px;width:230px;z-index:1;color:var(--gold-l);opacity:.13;pointer-events:none}}
 
 /* contact bar */
-.contact-bar{{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:22px 14px;background:var(--ivory)}}
+.contact-bar{{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:22px 14px;background:var(--cream-2)}}
 .cbtn{{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--plum);
   padding:11px 20px;border-radius:999px;border:1px solid var(--line);font-weight:600;font-size:.92rem;
   box-shadow:0 2px 10px rgba(70,28,93,.05);transition:.18s}}
@@ -499,26 +570,28 @@ html[data-lang="en"] .ka{{display:none !important}}
 .cbtn span{{white-space:nowrap}}
 
 /* section */
-.section-title{{font-family:var(--serif);text-align:center;margin:50px 0 2px;font-size:2rem;font-weight:600;color:var(--plum)}}
-.section-title::after{{content:"";display:block;width:56px;height:2px;margin:14px auto 0;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent)}}
+.section-title{{font-family:var(--serif);text-align:center;margin:52px 0 0;font-size:2.1rem;font-weight:600;color:var(--plum);scroll-margin-top:80px}}
 
 /* category grid */
-.cat-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px;margin:32px 0 64px}}
-.cat-card{{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
-  box-shadow:0 4px 18px rgba(70,28,93,.06);transition:transform .2s,box-shadow .2s}}
-.cat-card:hover{{transform:translateY(-4px);box-shadow:0 20px 42px rgba(70,28,93,.15)}}
-.cat-thumb{{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--taupe-l)}}
+.cat-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:28px;margin:30px 0 66px}}
+.cat-card{{background:#fff;border:1px solid var(--line);border-radius:16px 16px 14px 14px;overflow:hidden;
+  box-shadow:0 6px 22px rgba(70,28,93,.07);transition:transform .22s,box-shadow .22s}}
+.cat-card:hover{{transform:translateY(-5px);box-shadow:0 24px 48px rgba(70,28,93,.17)}}
+.cat-thumb{{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--royal);border-radius:15px 15px 0 0}}
 .cat-thumb img{{width:100%;height:100%;object-fit:cover;transition:transform .55s ease}}
 .cat-card:hover .cat-thumb img{{transform:scale(1.06)}}
-.badge{{position:absolute;top:12px;left:12px;z-index:2;background:var(--gold);color:#fff;
-  font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:5px 11px;border-radius:999px}}
-.cat-body{{padding:16px 18px 20px}}
-.cat-type{{display:block;font-weight:600;color:var(--ink);font-size:1.04rem}}
+.cat-thumb::after{{content:"";position:absolute;inset:10px;z-index:2;pointer-events:none;
+  border:1px solid rgba(226,207,149,.85);border-radius:125px 125px 6px 6px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.05) inset}}
+.badge{{position:absolute;top:14px;left:14px;z-index:3;background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#3a2410;
+  font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:5px 12px;border-radius:999px;
+  box-shadow:0 3px 10px rgba(0,0,0,.18)}}
+.cat-body{{padding:16px 18px 20px;text-align:center}}
+.cat-type{{display:block;font-weight:600;color:var(--ink);font-size:1.06rem}}
 .price-wrap{{margin:9px 0 5px}}
 .old{{text-decoration:line-through;color:var(--muted);margin-right:9px;font-size:.95rem}}
-.new{{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.45rem}}
-.ptag{{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#fff;
+.new{{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.5rem}}
+.ptag{{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#3a2410;
   padding:3px 8px;border-radius:999px;vertical-align:middle;margin-left:7px}}
 .cat-size{{display:block;color:var(--muted);font-size:.82rem;margin-top:6px;letter-spacing:.03em}}
 
@@ -527,6 +600,7 @@ html[data-lang="en"] .ka{{display:none !important}}
 .crumb{{color:var(--muted);font-size:.84rem}}
 .crumb a{{color:var(--plum)}}
 .crumb span{{margin:0 5px;opacity:.6}}
+.cat-head .leaf-div{{margin-top:6px}}
 .cat-over{{display:block;letter-spacing:.28em;text-transform:uppercase;font-size:.72rem;color:var(--gold);font-weight:700;margin-top:16px}}
 .cat-title{{font-family:var(--serif);color:var(--plum);font-size:clamp(1.9rem,4vw,2.7rem);margin:.25rem 0 .3rem;font-weight:600}}
 .cat-price{{font-family:var(--serif);font-size:1.55rem;margin:.3rem 0;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}}
@@ -541,14 +615,16 @@ html[data-lang="en"] .ka{{display:none !important}}
   border-radius:12px;padding:12px 18px;color:#4a3a52;font-size:.92rem}}
 
 /* item grid + lightbox trigger */
-.item-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;margin:28px 0 36px}}
+.item-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;margin:28px 0 36px}}
 .item{{margin:0;cursor:pointer;outline:none}}
-.item-img{{position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden;background:var(--taupe-l);
-  border:1px solid var(--line);box-shadow:0 4px 16px rgba(70,28,93,.07)}}
+.item-img{{position:relative;aspect-ratio:3/4;border-radius:14px 14px 8px 8px;overflow:hidden;background:var(--royal);
+  box-shadow:0 6px 20px rgba(70,28,93,.09)}}
 .item-img img{{width:100%;height:100%;object-fit:cover;transition:transform .45s}}
+.item-img::after{{content:"";position:absolute;inset:8px;z-index:2;pointer-events:none;
+  border:1px solid rgba(226,207,149,.8);border-radius:110px 110px 5px 5px}}
 .item:hover .item-img img,.item:focus .item-img img{{transform:scale(1.07)}}
-.zoom{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;
-  background:rgba(44,17,64,.3);opacity:0;transition:.2s}}
+.zoom{{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;color:#fff;
+  background:rgba(44,17,64,.32);opacity:0;transition:.2s}}
 .item:hover .zoom,.item:focus-visible .zoom{{opacity:1}}
 .item figcaption{{text-align:center;padding:9px 0 0;font-weight:600;color:var(--plum);font-size:.9rem;letter-spacing:.05em}}
 .back{{margin:6px 0 44px}}
@@ -556,9 +632,12 @@ html[data-lang="en"] .ka{{display:none !important}}
 .muted{{color:var(--muted);text-align:center}}
 
 /* footer */
-.site-footer{{background:var(--plum-d);color:#e7dcee;margin-top:24px;padding:48px 22px 26px}}
+.site-footer{{position:relative;background:var(--plum-d);color:#e7dcee;margin-top:24px;padding:46px 22px 26px;
+  border-top:2px solid transparent;border-image:linear-gradient(90deg,transparent,var(--gold),transparent) 1}}
 .foot-grid{{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:30px}}
-.foot-logo{{height:48px;background:#fff;border-radius:9px;padding:5px;width:auto}}
+.foot-mark{{display:block;width:56px;height:56px;border-radius:14px;overflow:hidden;
+  box-shadow:0 6px 16px rgba(0,0,0,.35)}}
+.foot-mark img{{width:100%;height:100%;object-fit:cover}}
 .foot-tag{{color:var(--taupe);margin-top:12px;font-size:.9rem;max-width:230px}}
 .site-footer h4{{font-family:var(--serif);color:#fff;margin:0 0 10px;font-weight:600;font-size:1.08rem}}
 .site-footer a{{color:var(--taupe);transition:.15s}}
@@ -582,12 +661,24 @@ html[data-lang="en"] .ka{{display:none !important}}
   color:#fff;font-size:.95rem;letter-spacing:.05em}}
 #lb-cap{{font-weight:700;color:var(--taupe)}}
 
+@media(max-width:820px){{
+  .hero-grid{{grid-template-columns:1fr;min-height:0}}
+  .hero-copy{{order:2;text-align:center;padding:38px 22px 34px}}
+  .hero-over,.hero-usp{{margin-left:auto;margin-right:auto}}
+  .leaf-div{{justify-content:center}}
+  .hero-cta{{justify-content:center}}
+  .hero-art{{order:1;height:230px;min-height:230px}}
+  .hero-art img{{-webkit-mask-image:linear-gradient(180deg,#000 78%,transparent);
+    mask-image:linear-gradient(180deg,#000 78%,transparent)}}
+  .hero-sprig{{display:none}}
+}}
 @media(max-width:560px){{
-  .hero{{padding:58px 18px 50px}}
   .cbtn span{{display:none}}
   .cbtn{{padding:12px}}
   .cat-grid{{gap:16px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
-  .item-grid{{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}}
+  .cat-thumb::after{{inset:7px;border-radius:90px 90px 5px 5px}}
+  .item-grid{{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}}
+  .item-img::after{{inset:6px;border-radius:80px 80px 4px 4px}}
   .lb-nav{{width:44px;height:44px}}
   .lb-prev{{left:8px}}.lb-next{{right:8px}}
 }}
@@ -601,7 +692,11 @@ def main():
     # .nojekyll so GitHub Pages serves everything as-is
     open(os.path.join(OUT, ".nojekyll"), "w").close()
 
+    # full logo (favicon / schema / social) + cropped emblem chip for the header & footer
     optimize_logo(LOGO_SRC, os.path.join(IMG_OUT, "logo.webp"))
+    optimize_logo(LOGO_SRC, os.path.join(IMG_OUT, "mark.webp"), maxw=200, box=(348, 244, 852, 748))
+    # hero art = the product scene cropped from the Facebook cover
+    optimize_cover(COVER_SRC, os.path.join(IMG_OUT, "hero.webp"), box=(880, 0, 1942, 809))
 
     cats = read_categories()
     for c in cats:
