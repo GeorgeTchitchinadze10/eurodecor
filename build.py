@@ -13,7 +13,7 @@ from PIL import Image, ImageOps
 # ---------------------------------------------------------------- paths
 ROOT     = r"D:\Eurodecor"
 XLSX     = os.path.join(ROOT, "Eurodecor - Catalog.xlsx")
-LOGO_SRC = os.path.join(ROOT, "Eurodecor Logo.png")
+LOGO_SRC = os.path.join(ROOT, "Eurodecor logo.jpg")
 HERE     = os.path.dirname(os.path.abspath(__file__))
 OUT      = os.path.join(HERE, "docs")
 IMG_OUT  = os.path.join(OUT, "assets", "img")
@@ -30,6 +30,7 @@ BIZ = {
     "whatsapp":      "995599922749",
     "messenger":     "https://m.me/eurodecorwallpaper",
     "facebook":      "https://www.facebook.com/eurodecorwallpaper",
+    "email":         "eurodecor.wallpaper@gmail.com",
     "address_ka": "აკაკი წერეთლის გამზირი 130, თბილისი 0119",
     "address_en": "130 Akaki Tsereteli Ave, Tbilisi 0119",
     "maps": "https://maps.app.goo.gl/YRNTNxxe1ZpKK7hP9",
@@ -208,6 +209,7 @@ ICON_PATHS = {
     "chat": '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.9-.9L3 20l1.3-3.9A8.4 8.4 0 1 1 21 11.5z"/>',
     "send": '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
     "pin": '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+    "mail": '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
     "chevL": '<polyline points="15 18 9 12 15 6"/>',
     "chevR": '<polyline points="9 18 15 12 9 6"/>',
     "close": '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
@@ -263,6 +265,7 @@ def contact_bar():
   <a href="https://wa.me/{esc(b['whatsapp'])}" class="cbtn cbtn-wa" target="_blank" rel="noopener">{icon('chat')}<span>WhatsApp</span></a>
   <a href="{esc(b['messenger'])}" class="cbtn cbtn-msg" target="_blank" rel="noopener">{icon('send')}<span>Messenger</span></a>
   <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("მისამართი","Directions")}</span></a>
+  <a href="mailto:{esc(b['email'])}" class="cbtn cbtn-mail">{icon('mail')}<span>Email</span></a>
 </nav>'''
 
 def footer_html():
@@ -271,12 +274,13 @@ def footer_html():
   <div class="foot-grid">
     <div>
       <img src="assets/img/logo.webp" alt="Eurodecor" class="foot-logo">
-      <p class="foot-tag">{i18n("პირდაპირ ქარხნიდან · 25 წლის გამოცდილება","Factory-direct · 25 years of experience","span")}</p>
+      <p class="foot-tag">{i18n("პირდაპირ ქარხნიდან · 25 წლიანი გამოცდილება","Factory-direct · 25 years of experience","span")}</p>
     </div>
     <div>
       <h4>{i18n("კონტაქტი","Contact","span")}</h4>
       <p>{i18n(b['address_ka'], b['address_en'],"span")}</p>
       <p><a href="tel:{esc(b['phone_tel'])}">{esc(b['phone_display'])}</a></p>
+      <p><a href="mailto:{esc(b['email'])}">{esc(b['email'])}</a></p>
       <p>{i18n(b['hours_ka'], b['hours_en'],"span")}</p>
     </div>
     <div>
@@ -346,7 +350,7 @@ def render_home(cats):
     grid = "\n".join(cards)
     hero = f'''<section class="hero">
     <div class="hero-inner">
-      <span class="hero-over">{i18n("· 25 წლის გამოცდილება ·","· EST. 25 YEARS ·","span")}</span>
+      <span class="hero-over">{i18n("· 25 წლიანი გამოცდილება ·","· EST. 25 YEARS ·","span")}</span>
       <h1>{i18n("ევროდეკორი","Eurodecor","span")}</h1>
       <p class="hero-sub">{i18n("შპალერების მაღაზია","Wallpaper Store","span")}</p>
       <span class="hero-rule"></span>
