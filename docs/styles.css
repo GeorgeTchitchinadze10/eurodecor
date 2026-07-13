@@ -8,7 +8,7 @@
   --cream:#f5efe7;
   --cream-2:#efe6da;
   --ink:#2c2333;
-  --muted:#8a7f92;
+  --muted:#6e6377;
   --gold:#c2a15c;
   --gold-l:#e4cf95;
   --sale:#8d2846;
@@ -155,7 +155,7 @@ html[data-lang="en"] .ka{display:none !important}
   box-shadow:0 6px 16px rgba(0,0,0,.35)}
 .foot-mark img{width:100%;height:100%;object-fit:cover}
 .foot-tag{color:var(--taupe);margin-top:12px;font-size:.9rem;max-width:230px}
-.site-footer h4{font-family:var(--serif);color:#fff;margin:0 0 10px;font-weight:600;font-size:1.08rem}
+.site-footer h2{font-family:var(--serif);color:#fff;margin:0 0 10px;font-weight:600;font-size:1.08rem}
 .site-footer a{color:var(--taupe);transition:.15s}
 .site-footer a:hover{color:#fff}
 .site-footer p{margin:.35rem 0;font-size:.92rem}

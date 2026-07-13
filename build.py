@@ -135,7 +135,15 @@ def optimize_logo(src, dst, maxw=420, box=None):
         im = im.resize((maxw, round(h * maxw / w)), Image.LANCZOS)
     im.save(dst, "WEBP", quality=90, method=6)
 
-def optimize_cover(src, dst, box=None, maxw=1240, q=84):
+def make_thumb(src, dst, maxw=520, q=76):
+    """Downscale an already-optimized image to a small card thumbnail."""
+    im = Image.open(src)
+    w, h = im.size
+    if w > maxw:
+        im = im.resize((maxw, round(h * maxw / w)), Image.LANCZOS)
+    im.save(dst, "WEBP", quality=q, method=6)
+
+def optimize_cover(src, dst, box=None, maxw=1000, q=82):
     """Crop the product scene out of the Facebook cover for the hero art."""
     im = Image.open(src)
     im = ImageOps.exif_transpose(im)
@@ -253,7 +261,12 @@ def sprig_svg(cls="hero-sprig"):
     return (f'<svg class="{cls}" viewBox="0 0 200 200" fill="currentColor" aria-hidden="true">'
             f'{stem}{"".join(leaves)}</svg>')
 
-def head(title_ka, title_en, desc_ka, canonical):
+FONT_URL = ("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700"
+            "&family=Noto+Serif+Georgian:wght@600;700"
+            "&family=Noto+Sans+Georgian:wght@400;600&display=swap")
+
+def head(title_ka, title_en, desc_ka, canonical, preload_img=None):
+    preload = f'\n<link rel="preload" as="image" href="{preload_img}" fetchpriority="high">' if preload_img else ""
     ld = f'''{{
       "@context":"https://schema.org","@type":"HomeGoodsStore",
       "name":"Eurodecor {esc(BIZ["sub_en"])}",
@@ -268,10 +281,12 @@ def head(title_ka, title_en, desc_ka, canonical):
 <link rel="canonical" href="{esc(canonical)}">
 <meta property="og:title" content="{esc(title_ka)} | {esc(title_en)}">
 <meta property="og:description" content="{esc(desc_ka)}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="website">{preload}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Noto+Serif+Georgian:wght@500;600;700&family=Noto+Sans+Georgian:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="{FONT_URL}">
+<link rel="stylesheet" href="{FONT_URL}" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="{FONT_URL}"></noscript>
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" href="assets/img/logo.webp">
 <script type="application/ld+json">{ld}</script>'''
@@ -293,11 +308,11 @@ def header_html():
 def contact_bar():
     b = BIZ
     return f'''<nav class="contact-bar" aria-label="Contact">
-  <a href="tel:{esc(b['phone_tel'])}" class="cbtn cbtn-call">{icon('phone')}<span>{i18n("დარეკვა","Call")}</span></a>
-  <a href="https://wa.me/{esc(b['whatsapp'])}" class="cbtn cbtn-wa" target="_blank" rel="noopener">{icon('chat')}<span>WhatsApp</span></a>
-  <a href="{esc(b['messenger'])}" class="cbtn cbtn-msg" target="_blank" rel="noopener">{icon('send')}<span>Messenger</span></a>
-  <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("მისამართი","Directions")}</span></a>
-  <a href="mailto:{esc(b['email'])}" class="cbtn cbtn-mail">{icon('mail')}<span>Email</span></a>
+  <a href="tel:{esc(b['phone_tel'])}" class="cbtn cbtn-call" aria-label="დარეკვა · Call">{icon('phone')}<span>{i18n("დარეკვა","Call")}</span></a>
+  <a href="https://wa.me/{esc(b['whatsapp'])}" class="cbtn cbtn-wa" target="_blank" rel="noopener" aria-label="WhatsApp">{icon('chat')}<span>WhatsApp</span></a>
+  <a href="{esc(b['messenger'])}" class="cbtn cbtn-msg" target="_blank" rel="noopener" aria-label="Messenger">{icon('send')}<span>Messenger</span></a>
+  <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener" aria-label="მისამართი · Directions">{icon('pin')}<span>{i18n("მისამართი","Directions")}</span></a>
+  <a href="mailto:{esc(b['email'])}" class="cbtn cbtn-mail" aria-label="Email">{icon('mail')}<span>Email</span></a>
 </nav>'''
 
 def footer_html():
@@ -309,14 +324,14 @@ def footer_html():
       <p class="foot-tag">{i18n("პირდაპირ ქარხნიდან · 25 წლიანი გამოცდილება","Factory-direct · 25 years of experience","span")}</p>
     </div>
     <div>
-      <h4>{i18n("კონტაქტი","Contact","span")}</h4>
+      <h2>{i18n("კონტაქტი","Contact","span")}</h2>
       <p>{i18n(b['address_ka'], b['address_en'],"span")}</p>
       <p><a href="tel:{esc(b['phone_tel'])}">{esc(b['phone_display'])}</a></p>
       <p><a href="mailto:{esc(b['email'])}">{esc(b['email'])}</a></p>
       <p>{i18n(b['hours_ka'], b['hours_en'],"span")}</p>
     </div>
     <div>
-      <h4>{i18n("გვეწვიეთ","Visit us","span")}</h4>
+      <h2>{i18n("გვეწვიეთ","Visit us","span")}</h2>
       <p><a href="{esc(b['maps'])}" target="_blank" rel="noopener">{i18n("რუკაზე ნახვა →","Open in Maps →","span")}</a></p>
       <p><a href="{esc(b['facebook'])}" target="_blank" rel="noopener">Facebook →</a></p>
     </div>
@@ -367,11 +382,11 @@ LIGHTBOX_JS = '''<script>
 def render_home(cats):
     cards = []
     for c in cats:
-        first_img = c["items"][0]["img"] if c["items"] else "assets/img/logo.webp"
+        first_img = c.get("thumb", "assets/img/logo.webp")
         badge = f'<span class="badge">{i18n("ფასდაკლება","Sale")}</span>' if c["old"] else ""
         cards.append(f'''<a class="cat-card" href="category-{c['no']}.html">
       <div class="cat-thumb">{badge}
-        <img loading="lazy" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}">
+        <img loading="lazy" decoding="async" width="520" height="693" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}">
       </div>
       <div class="cat-body">
         <span class="cat-type">{i18n(c['type_ka'], c['type_en'])}</span>
@@ -394,7 +409,7 @@ def render_home(cats):
           <a class="btn btn-ghost" href="#categories">{i18n("კატალოგის ნახვა","Browse catalog")}</a>
         </div>
       </div>
-      <div class="hero-art"><img src="assets/img/hero.webp" alt="Eurodecor — ევროდეკორის შპალერები"></div>
+      <div class="hero-art"><img src="assets/img/hero.webp" width="1000" height="762" fetchpriority="high" decoding="async" alt="Eurodecor — ევროდეკორის შპალერები"></div>
     </div>
   </section>'''
     body = f'''{header_html()}
@@ -413,7 +428,7 @@ def render_home(cats):
     title_en = "Eurodecor — Wallpaper Store in Tbilisi"
     desc = "შპალერი, ვინილის შპალერი, ფლიზელინი, შესაღები შპალერი და შპალერის წებო — საუკეთესო ფასებში, პირდაპირ ქარხნიდან. თბილისი, აკაკი წერეთლის 130."
     return f'''<!doctype html><html lang="ka" data-lang="ka"><head>
-{head(title_ka, title_en, desc, BIZ["site_url"] + "/")}
+{head(title_ka, title_en, desc, BIZ["site_url"] + "/", preload_img="assets/img/hero.webp")}
 </head><body>
 {body}
 </body></html>'''
@@ -492,7 +507,7 @@ def write_css():
   --cream:#f5efe7;
   --cream-2:#efe6da;
   --ink:#2c2333;
-  --muted:#8a7f92;
+  --muted:#6e6377;
   --gold:#c2a15c;
   --gold-l:#e4cf95;
   --sale:#8d2846;
@@ -639,7 +654,7 @@ html[data-lang="en"] .ka{{display:none !important}}
   box-shadow:0 6px 16px rgba(0,0,0,.35)}}
 .foot-mark img{{width:100%;height:100%;object-fit:cover}}
 .foot-tag{{color:var(--taupe);margin-top:12px;font-size:.9rem;max-width:230px}}
-.site-footer h4{{font-family:var(--serif);color:#fff;margin:0 0 10px;font-weight:600;font-size:1.08rem}}
+.site-footer h2{{font-family:var(--serif);color:#fff;margin:0 0 10px;font-weight:600;font-size:1.08rem}}
 .site-footer a{{color:var(--taupe);transition:.15s}}
 .site-footer a:hover{{color:#fff}}
 .site-footer p{{margin:.35rem 0;font-size:.92rem}}
@@ -701,6 +716,14 @@ def main():
     cats = read_categories()
     for c in cats:
         c["items"] = build_items(c)
+        # small thumbnail for the home grid (the full item photo is far too big for a card)
+        if c["items"]:
+            src = os.path.join(OUT, c["items"][0]["img"])
+            thumb_rel = f"assets/img/card-{c['no']}.webp"
+            make_thumb(src, os.path.join(OUT, thumb_rel))
+            c["thumb"] = thumb_rel
+        else:
+            c["thumb"] = "assets/img/logo.webp"
         print(f"  category {c['no']} ({c['type_en']}): {len(c['items'])} items")
 
     write_css()
