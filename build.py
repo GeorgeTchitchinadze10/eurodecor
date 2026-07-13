@@ -394,7 +394,7 @@ def render_home(cats):
           <a class="btn btn-ghost" href="#categories">{i18n("კატალოგის ნახვა","Browse catalog")}</a>
         </div>
       </div>
-      <div class="hero-art"><img src="assets/img/hero.webp" alt="{i18n('ევროდეკორის შპალერები','Eurodecor wallpapers')}"></div>
+      <div class="hero-art"><img src="assets/img/hero.webp" alt="Eurodecor — ევროდეკორის შპალერები"></div>
     </div>
   </section>'''
     body = f'''{header_html()}
