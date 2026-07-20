@@ -283,10 +283,10 @@
     var rw=parseFloat(document.getElementById('calcRW').value)||1.06;
     var rollLen=10;
     if(L<=0||W<=0||H<=0){return warn('შეავსეთ ყველა ველი სწორად.','Please fill in all fields correctly.');}
-    if(H+0.10>rollLen){return warn('კედელი ძალიან მაღალია ამ რულონისთვის.','Wall is too tall for this roll.');}
+    if(H>rollLen){return warn('კედელი ძალიან მაღალია ამ რულონისთვის.','Wall is too tall for this roll.');}
     var perimeter=2*(L+W);
     var strips=Math.ceil(perimeter/rw);
-    var stripsPerRoll=Math.floor(rollLen/(H+0.10));
+    var stripsPerRoll=Math.floor(rollLen/H);
     var rolls=Math.ceil(strips/stripsPerRoll);
     var withExtra=rolls+1;
     res.hidden=false;res.className='calc-result';
