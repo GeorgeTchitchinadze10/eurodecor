@@ -147,6 +147,32 @@ html[data-lang="en"] .ka{display:none !important}
 .back a{color:var(--plum);font-weight:600}
 .muted{color:var(--muted);text-align:center}
 
+/* calculator */
+.calc-section{padding:26px 0 8px}
+.calc-card{background:#fff;border:1px solid var(--taupe);border-radius:20px;padding:26px 24px;
+  box-shadow:0 14px 34px rgba(70,28,93,.10);position:relative}
+.calc-card::after{content:"";position:absolute;inset:0;border-radius:20px;pointer-events:none;
+  box-shadow:inset 0 0 0 2px rgba(194,161,92,.28)}
+.calc-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.calc-ic{display:flex;align-items:center;justify-content:center;width:46px;height:46px;flex:0 0 auto;
+  border-radius:12px;background:var(--plum);color:var(--gold-l,#e4cf95)}
+.calc-title{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.4rem;margin:0}
+.calc-sub{color:var(--muted);font-size:.92rem;margin:2px 0 0}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 16px;margin-bottom:20px}
+.calc-field{display:flex;flex-direction:column;gap:6px;font-size:.86rem;font-weight:600;color:var(--ink)}
+.calc-field input,.calc-field select{font:inherit;font-weight:500;padding:11px 12px;border:1px solid var(--taupe);
+  border-radius:10px;background:var(--cream);color:var(--ink);width:100%}
+.calc-field input:focus,.calc-field select:focus{outline:none;border-color:var(--plum);
+  box-shadow:0 0 0 3px rgba(90,34,136,.15)}
+.calc-btn{width:100%;justify-content:center}
+.calc-result{margin-top:20px;padding:20px;border-radius:14px;background:var(--cream);
+  border:1px dashed var(--gold);text-align:center}
+.calc-result--warn{border-style:solid;border-color:#c14b4b;background:rgba(193,75,75,.06);color:#a24141;font-weight:600}
+.calc-big{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.5rem}
+.calc-num{font-size:2.6rem;line-height:1;color:var(--royal,#5a2288)}
+.calc-rec{color:var(--ink);font-weight:600;margin:10px 0 0;font-size:.95rem}
+.calc-hint{color:var(--muted);font-size:.82rem;margin:8px 0 0}
+
 /* map */
 .map-section{padding:10px 0 6px}
 .map-inner{margin-top:8px}

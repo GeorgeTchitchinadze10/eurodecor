@@ -235,6 +235,7 @@ ICON_PATHS = {
     "chevR": '<polyline points="9 18 15 12 9 6"/>',
     "close": '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
     "zoom": '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>',
+    "ruler": '<path d="M2.5 15.5 15.5 2.5a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L8.5 21.5a2 2 0 0 1-2.8 0l-3.2-3.2a2 2 0 0 1 0-2.8z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/>',
 }
 
 def icon(name, size=20):
@@ -314,6 +315,33 @@ def contact_bar():
   <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener" aria-label="მისამართი · Directions">{icon('pin')}<span>{i18n("მისამართი","Directions")}</span></a>
   <a href="mailto:{esc(b['email'])}" class="cbtn cbtn-mail" aria-label="Email">{icon('mail')}<span>Email</span></a>
 </nav>'''
+
+def calc_section():
+    return f'''<section class="calc-section" aria-label="Wallpaper calculator">
+  <div class="container">
+    <div class="calc-card">
+      <div class="calc-head">
+        <span class="calc-ic">{icon('ruler', 24)}</span>
+        <div>
+          <h2 class="calc-title">{i18n("შპალერის კალკულატორი","Wallpaper calculator","span")}</h2>
+          <p class="calc-sub">{i18n("გამოთვალეთ რამდენი რულონი დაგჭირდებათ","Estimate how many rolls you need","span")}</p>
+        </div>
+      </div>
+      <div class="calc-grid">
+        <label class="calc-field"><span>{i18n("ოთახის სიგრძე (მ)","Room length (m)","span")}</span>
+          <input type="number" id="calcL" min="0" step="0.1" inputmode="decimal" placeholder="4"></label>
+        <label class="calc-field"><span>{i18n("ოთახის სიგანე (მ)","Room width (m)","span")}</span>
+          <input type="number" id="calcW" min="0" step="0.1" inputmode="decimal" placeholder="3"></label>
+        <label class="calc-field"><span>{i18n("კედლის სიმაღლე (მ)","Wall height (m)","span")}</span>
+          <input type="number" id="calcH" min="0" step="0.1" inputmode="decimal" placeholder="2.7"></label>
+        <label class="calc-field"><span>{i18n("რულონის ზომა","Roll size","span")}</span>
+          <select id="calcRW"><option value="1.06">1.06 m × 10 m</option><option value="0.53">0.53 m × 10 m</option></select></label>
+      </div>
+      <button type="button" id="calcBtn" class="btn btn-gold calc-btn">{icon('ruler')}<span>{i18n("გამოთვლა","Calculate")}</span></button>
+      <div class="calc-result" id="calcResult" hidden></div>
+    </div>
+  </div>
+</section>'''
 
 def map_section():
     b = BIZ
@@ -396,6 +424,41 @@ STATUS_JS = '''<script>
 })();
 </script>'''
 
+CALC_JS = '''<script>
+(function(){
+  var btn=document.getElementById('calcBtn');
+  if(!btn)return;
+  var res=document.getElementById('calcResult');
+  function num(id){var v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;}
+  function warn(ka,en){res.hidden=false;res.className='calc-result calc-result--warn';
+    res.innerHTML='<span class="ka">'+ka+'</span><span class="en">'+en+'</span>';}
+  function calc(){
+    var L=num('calcL'),W=num('calcW'),H=num('calcH');
+    var rw=parseFloat(document.getElementById('calcRW').value)||1.06;
+    var rollLen=10;
+    if(L<=0||W<=0||H<=0){return warn('შეავსეთ ყველა ველი სწორად.','Please fill in all fields correctly.');}
+    if(H+0.10>rollLen){return warn('კედელი ძალიან მაღალია ამ რულონისთვის.','Wall is too tall for this roll.');}
+    var perimeter=2*(L+W);
+    var strips=Math.ceil(perimeter/rw);
+    var stripsPerRoll=Math.floor(rollLen/(H+0.10));
+    var rolls=Math.ceil(strips/stripsPerRoll);
+    var withExtra=rolls+1;
+    res.hidden=false;res.className='calc-result';
+    res.innerHTML=
+      '<div class="calc-big"><span class="calc-num">'+rolls+'</span>'
+      +'<span class="ka">&nbsp;რულონი</span><span class="en">&nbsp;rolls</span></div>'
+      +'<p class="calc-rec"><span class="ka">გირჩევთ აიღოთ '+withExtra+' რულონი — მარაგი ჭრისა და ნახატის დასამთხვევად.</span>'
+      +'<span class="en">We recommend buying '+withExtra+' rolls — one spare for cutting and pattern matching.</span></p>'
+      +'<p class="calc-hint"><span class="ka">პერიმეტრი ≈ '+perimeter.toFixed(1)+' მ · '+strips+' ზოლი · '+stripsPerRoll+' ზოლი / რულონი</span>'
+      +'<span class="en">Perimeter ≈ '+perimeter.toFixed(1)+' m · '+strips+' strips · '+stripsPerRoll+' strips / roll</span></p>';
+  }
+  btn.addEventListener('click',calc);
+  ['calcL','calcW','calcH'].forEach(function(id){
+    document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')calc();});
+  });
+})();
+</script>'''
+
 LIGHTBOX_JS = '''<script>
 (function(){
   var figs=[].slice.call(document.querySelectorAll('.item-grid .item'));
@@ -466,9 +529,11 @@ def render_home(cats):
     {grid}
   </div>
 </main>
+{calc_section()}
 {map_section()}
 {footer_html()}
-{LANG_JS}'''
+{LANG_JS}
+{CALC_JS}'''
     title_ka = "ევროდეკორი — შპალერების მაღაზია თბილისში"
     title_en = "Eurodecor — Wallpaper Store in Tbilisi"
     desc = "შპალერი, ვინილის შპალერი, ფლიზელინი, შესაღები შპალერი და შპალერის წებო — საუკეთესო ფასებში, პირდაპირ ქარხნიდან. თბილისი, აკაკი წერეთლის 130."
@@ -690,6 +755,32 @@ html[data-lang="en"] .ka{{display:none !important}}
 .back{{margin:6px 0 44px}}
 .back a{{color:var(--plum);font-weight:600}}
 .muted{{color:var(--muted);text-align:center}}
+
+/* calculator */
+.calc-section{{padding:26px 0 8px}}
+.calc-card{{background:#fff;border:1px solid var(--taupe);border-radius:20px;padding:26px 24px;
+  box-shadow:0 14px 34px rgba(70,28,93,.10);position:relative}}
+.calc-card::after{{content:"";position:absolute;inset:0;border-radius:20px;pointer-events:none;
+  box-shadow:inset 0 0 0 2px rgba(194,161,92,.28)}}
+.calc-head{{display:flex;align-items:center;gap:14px;margin-bottom:20px}}
+.calc-ic{{display:flex;align-items:center;justify-content:center;width:46px;height:46px;flex:0 0 auto;
+  border-radius:12px;background:var(--plum);color:var(--gold-l,#e4cf95)}}
+.calc-title{{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.4rem;margin:0}}
+.calc-sub{{color:var(--muted);font-size:.92rem;margin:2px 0 0}}
+.calc-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 16px;margin-bottom:20px}}
+.calc-field{{display:flex;flex-direction:column;gap:6px;font-size:.86rem;font-weight:600;color:var(--ink)}}
+.calc-field input,.calc-field select{{font:inherit;font-weight:500;padding:11px 12px;border:1px solid var(--taupe);
+  border-radius:10px;background:var(--cream);color:var(--ink);width:100%}}
+.calc-field input:focus,.calc-field select:focus{{outline:none;border-color:var(--plum);
+  box-shadow:0 0 0 3px rgba(90,34,136,.15)}}
+.calc-btn{{width:100%;justify-content:center}}
+.calc-result{{margin-top:20px;padding:20px;border-radius:14px;background:var(--cream);
+  border:1px dashed var(--gold);text-align:center}}
+.calc-result--warn{{border-style:solid;border-color:#c14b4b;background:rgba(193,75,75,.06);color:#a24141;font-weight:600}}
+.calc-big{{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.5rem}}
+.calc-num{{font-size:2.6rem;line-height:1;color:var(--royal,#5a2288)}}
+.calc-rec{{color:var(--ink);font-weight:600;margin:10px 0 0;font-size:.95rem}}
+.calc-hint{{color:var(--muted);font-size:.82rem;margin:8px 0 0}}
 
 /* map */
 .map-section{{padding:10px 0 6px}}

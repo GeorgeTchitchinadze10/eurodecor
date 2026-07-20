@@ -175,6 +175,31 @@
     </a>
   </div>
 </main>
+<section class="calc-section" aria-label="Wallpaper calculator">
+  <div class="container">
+    <div class="calc-card">
+      <div class="calc-head">
+        <span class="calc-ic"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 15.5 15.5 2.5a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L8.5 21.5a2 2 0 0 1-2.8 0l-3.2-3.2a2 2 0 0 1 0-2.8z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/></svg></span>
+        <div>
+          <h2 class="calc-title"><span class="ka">შპალერის კალკულატორი</span><span class="en">Wallpaper calculator</span></h2>
+          <p class="calc-sub"><span class="ka">გამოთვალეთ რამდენი რულონი დაგჭირდებათ</span><span class="en">Estimate how many rolls you need</span></p>
+        </div>
+      </div>
+      <div class="calc-grid">
+        <label class="calc-field"><span><span class="ka">ოთახის სიგრძე (მ)</span><span class="en">Room length (m)</span></span>
+          <input type="number" id="calcL" min="0" step="0.1" inputmode="decimal" placeholder="4"></label>
+        <label class="calc-field"><span><span class="ka">ოთახის სიგანე (მ)</span><span class="en">Room width (m)</span></span>
+          <input type="number" id="calcW" min="0" step="0.1" inputmode="decimal" placeholder="3"></label>
+        <label class="calc-field"><span><span class="ka">კედლის სიმაღლე (მ)</span><span class="en">Wall height (m)</span></span>
+          <input type="number" id="calcH" min="0" step="0.1" inputmode="decimal" placeholder="2.7"></label>
+        <label class="calc-field"><span><span class="ka">რულონის ზომა</span><span class="en">Roll size</span></span>
+          <select id="calcRW"><option value="1.06">1.06 m × 10 m</option><option value="0.53">0.53 m × 10 m</option></select></label>
+      </div>
+      <button type="button" id="calcBtn" class="btn btn-gold calc-btn"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 15.5 15.5 2.5a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L8.5 21.5a2 2 0 0 1-2.8 0l-3.2-3.2a2 2 0 0 1 0-2.8z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/></svg><span><span class="ka">გამოთვლა</span><span class="en">Calculate</span></span></button>
+      <div class="calc-result" id="calcResult" hidden></div>
+    </div>
+  </div>
+</section>
 <section class="map-section" aria-label="Location">
   <div class="container map-inner">
     <div class="map-head">
@@ -243,6 +268,40 @@
     var cur=root.getAttribute('data-lang')==='en'?'ka':'en';
     root.setAttribute('data-lang',cur);localStorage.setItem('lang',cur);
   });}
+})();
+</script>
+<script>
+(function(){
+  var btn=document.getElementById('calcBtn');
+  if(!btn)return;
+  var res=document.getElementById('calcResult');
+  function num(id){var v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;}
+  function warn(ka,en){res.hidden=false;res.className='calc-result calc-result--warn';
+    res.innerHTML='<span class="ka">'+ka+'</span><span class="en">'+en+'</span>';}
+  function calc(){
+    var L=num('calcL'),W=num('calcW'),H=num('calcH');
+    var rw=parseFloat(document.getElementById('calcRW').value)||1.06;
+    var rollLen=10;
+    if(L<=0||W<=0||H<=0){return warn('შეავსეთ ყველა ველი სწორად.','Please fill in all fields correctly.');}
+    if(H+0.10>rollLen){return warn('კედელი ძალიან მაღალია ამ რულონისთვის.','Wall is too tall for this roll.');}
+    var perimeter=2*(L+W);
+    var strips=Math.ceil(perimeter/rw);
+    var stripsPerRoll=Math.floor(rollLen/(H+0.10));
+    var rolls=Math.ceil(strips/stripsPerRoll);
+    var withExtra=rolls+1;
+    res.hidden=false;res.className='calc-result';
+    res.innerHTML=
+      '<div class="calc-big"><span class="calc-num">'+rolls+'</span>'
+      +'<span class="ka">&nbsp;რულონი</span><span class="en">&nbsp;rolls</span></div>'
+      +'<p class="calc-rec"><span class="ka">გირჩევთ აიღოთ '+withExtra+' რულონი — მარაგი ჭრისა და ნახატის დასამთხვევად.</span>'
+      +'<span class="en">We recommend buying '+withExtra+' rolls — one spare for cutting and pattern matching.</span></p>'
+      +'<p class="calc-hint"><span class="ka">პერიმეტრი ≈ '+perimeter.toFixed(1)+' მ · '+strips+' ზოლი · '+stripsPerRoll+' ზოლი / რულონი</span>'
+      +'<span class="en">Perimeter ≈ '+perimeter.toFixed(1)+' m · '+strips+' strips · '+stripsPerRoll+' strips / roll</span></p>';
+  }
+  btn.addEventListener('click',calc);
+  ['calcL','calcW','calcH'].forEach(function(id){
+    document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')calc();});
+  });
 })();
 </script>
 </body></html>
