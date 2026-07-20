@@ -325,7 +325,7 @@ def map_section():
       <div>
         <h2 class="map-title">{i18n("მისამართი","Address","span")}</h2>
         <p class="map-addr">{i18n(b['address_ka'], b['address_en'],"span")}</p>
-        <p class="map-hours">{i18n(b['hours_ka'], b['hours_en'],"span")}</p>
+        <p class="map-hours">{i18n(b['hours_ka'], b['hours_en'],"span")} <span class="open-status" data-openstatus></span></p>
       </div>
       <a href="{esc(b['maps'])}" class="btn btn-gold map-btn" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("რუკაზე ნახვა","View on map")}</span></a>
     </div>
@@ -348,7 +348,7 @@ def footer_html():
       <p>{i18n(b['address_ka'], b['address_en'],"span")}</p>
       <p><a href="tel:{esc(b['phone_tel'])}">{esc(b['phone_display'])}</a></p>
       <p><a href="mailto:{esc(b['email'])}">{esc(b['email'])}</a></p>
-      <p>{i18n(b['hours_ka'], b['hours_en'],"span")}</p>
+      <p>{i18n(b['hours_ka'], b['hours_en'],"span")} <span class="open-status" data-openstatus></span></p>
     </div>
     <div>
       <h2>{i18n("გვეწვიეთ","Visit us","span")}</h2>
@@ -357,7 +357,12 @@ def footer_html():
     </div>
   </div>
   <p class="copyright">© 2026 Eurodecor · {i18n("ყველა უფლება დაცულია","All rights reserved","span")}</p>
-</footer>'''
+</footer>
+<div class="sticky-contact" aria-label="Quick contact">
+  <a href="https://wa.me/{esc(b['whatsapp'])}" class="sc-btn sc-wa" target="_blank" rel="noopener" aria-label="WhatsApp">{icon('chat', 26)}</a>
+  <a href="tel:{esc(b['phone_tel'])}" class="sc-btn sc-call" aria-label="დარეკვა · Call">{icon('phone', 26)}</a>
+</div>
+{STATUS_JS}'''
 
 LANG_JS = '''<script>
 (function(){
@@ -369,6 +374,25 @@ LANG_JS = '''<script>
     var cur=root.getAttribute('data-lang')==='en'?'ka':'en';
     root.setAttribute('data-lang',cur);localStorage.setItem('lang',cur);
   });}
+})();
+</script>'''
+
+STATUS_JS = '''<script>
+(function(){
+  var els=document.querySelectorAll('[data-openstatus]');
+  if(!els.length)return;
+  var h;
+  try{h=parseInt(new Intl.DateTimeFormat('en-GB',{hour:'2-digit',hour12:false,timeZone:'Asia/Tbilisi'}).format(new Date()),10);}
+  catch(e){h=new Date().getHours();}
+  h=h%24;
+  var open=h>=10&&h<19;
+  var html=open
+    ?'<span class="ka">ღიაა ახლა</span><span class="en">Open now</span>'
+    :'<span class="ka">დაკეტილია</span><span class="en">Closed</span>';
+  for(var i=0;i<els.length;i++){
+    els[i].className='open-status '+(open?'open-status--open':'open-status--closed');
+    els[i].innerHTML=html;
+  }
 })();
 </script>'''
 
@@ -681,6 +705,30 @@ html[data-lang="en"] .ka{{display:none !important}}
   box-shadow:inset 0 0 0 3px rgba(194,161,92,.35)}}
 .map-frame iframe{{display:block}}
 @media(max-width:560px){{.map-head{{align-items:flex-start}}.map-btn{{width:100%;justify-content:center}}.map-title{{font-size:1.3rem}}}}
+
+/* open/closed status badge */
+.open-status{{display:none;align-items:center;gap:6px;margin-left:8px;padding:2px 10px;border-radius:999px;
+  font-size:.78rem;font-weight:700;letter-spacing:.02em;vertical-align:middle;white-space:nowrap}}
+.open-status--open,.open-status--closed{{display:inline-flex}}
+.open-status::before{{content:"";width:7px;height:7px;border-radius:50%}}
+.open-status--open{{background:rgba(46,140,74,.14);color:#1f7a3d}}
+.open-status--open::before{{background:#25a04c;box-shadow:0 0 0 3px rgba(37,160,76,.22)}}
+.open-status--closed{{background:rgba(150,60,60,.12);color:#a24141}}
+.open-status--closed::before{{background:#c14b4b}}
+.site-footer .open-status--open{{background:rgba(255,255,255,.12);color:#8fe6a6}}
+.site-footer .open-status--closed{{background:rgba(255,255,255,.1);color:#e8a9a9}}
+
+/* sticky mobile contact */
+.sticky-contact{{display:none}}
+@media(max-width:820px){{
+  .sticky-contact{{display:flex;flex-direction:column;gap:12px;position:fixed;right:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom));z-index:200}}
+  .sc-btn{{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;
+    color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.28)}}
+  .sc-btn svg{{width:26px;height:26px}}
+  .sc-wa{{background:#25d366}}
+  .sc-call{{background:var(--plum)}}
+}}
 
 /* footer */
 .site-footer{{position:relative;background:var(--plum-d);color:#e7dcee;margin-top:24px;padding:46px 22px 26px;
