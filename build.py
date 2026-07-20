@@ -315,6 +315,26 @@ def contact_bar():
   <a href="mailto:{esc(b['email'])}" class="cbtn cbtn-mail" aria-label="Email">{icon('mail')}<span>Email</span></a>
 </nav>'''
 
+def map_section():
+    b = BIZ
+    query = "130+Akaki+Tsereteli+Avenue,+Tbilisi+0119"
+    embed = f"https://www.google.com/maps?q={query}&z=16&output=embed&hl=ka"
+    return f'''<section class="map-section" aria-label="Location">
+  <div class="container map-inner">
+    <div class="map-head">
+      <div>
+        <h2 class="map-title">{i18n("მისამართი","Address","span")}</h2>
+        <p class="map-addr">{i18n(b['address_ka'], b['address_en'],"span")}</p>
+        <p class="map-hours">{i18n(b['hours_ka'], b['hours_en'],"span")}</p>
+      </div>
+      <a href="{esc(b['maps'])}" class="btn btn-gold map-btn" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("რუკაზე ნახვა","View on map")}</span></a>
+    </div>
+    <div class="map-frame">
+      <iframe src="{embed}" width="100%" height="380" style="border:0" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Eurodecor — რუკა"></iframe>
+    </div>
+  </div>
+</section>'''
+
 def footer_html():
     b = BIZ
     return f'''<footer class="site-footer">
@@ -422,6 +442,7 @@ def render_home(cats):
     {grid}
   </div>
 </main>
+{map_section()}
 {footer_html()}
 {LANG_JS}'''
     title_ka = "ევროდეკორი — შპალერების მაღაზია თბილისში"
@@ -645,6 +666,21 @@ html[data-lang="en"] .ka{{display:none !important}}
 .back{{margin:6px 0 44px}}
 .back a{{color:var(--plum);font-weight:600}}
 .muted{{color:var(--muted);text-align:center}}
+
+/* map */
+.map-section{{padding:10px 0 6px}}
+.map-inner{{margin-top:8px}}
+.map-head{{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:16px}}
+.map-title{{font-family:var(--serif);color:var(--plum);font-weight:700;font-size:1.5rem;margin:0}}
+.map-addr{{color:var(--ink);font-weight:600;margin:6px 0 2px}}
+.map-hours{{color:var(--muted);font-size:.92rem;margin:0}}
+.map-btn{{flex:0 0 auto}}
+.map-frame{{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--taupe);
+  box-shadow:0 14px 34px rgba(70,28,93,.16)}}
+.map-frame::after{{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;
+  box-shadow:inset 0 0 0 3px rgba(194,161,92,.35)}}
+.map-frame iframe{{display:block}}
+@media(max-width:560px){{.map-head{{align-items:flex-start}}.map-btn{{width:100%;justify-content:center}}.map-title{{font-size:1.3rem}}}}
 
 /* footer */
 .site-footer{{position:relative;background:var(--plum-d);color:#e7dcee;margin-top:24px;padding:46px 22px 26px;
