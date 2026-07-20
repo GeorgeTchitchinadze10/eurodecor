@@ -34,9 +34,11 @@ BIZ = {
     "email":         "eurodecor.wallpaper@gmail.com",
     "address_ka": "აკაკი წერეთლის გამზირი 130, თბილისი 0119",
     "address_en": "130 Akaki Tsereteli Ave, Tbilisi 0119",
+    "address_ru": "проспект Акакия Церетели 130, Тбилиси 0119",
     "maps": "https://maps.app.goo.gl/YRNTNxxe1ZpKK7hP9",
     "hours_ka": "ყოველდღე 10:00 – 19:00",
     "hours_en": "Every day 10:00 – 19:00",
+    "hours_ru": "Ежедневно 10:00 – 19:00",
     "site_url": "https://georgetchitchinadze10.github.io/eurodecor",
 }
 
@@ -45,9 +47,9 @@ C_SECOND  = "#d1c2b9"
 
 # ---------------------------------------------------------------- type + EN descriptions
 TYPE_MAP = {
-    "Wallpaper":            {"ka": "შპალერი",           "en": "Wallpaper",          "key": "wallpaper"},
-    "შესაღები ფლიზერინი":   {"ka": "შესაღები ფლიზელინი", "en": "Paintable flizeline","key": "paintable"},
-    "Glue":                {"ka": "შპალერის წებო",      "en": "Wallpaper glue",     "key": "glue"},
+    "Wallpaper":            {"ka": "შპალერი",           "en": "Wallpaper",          "ru": "Обои",                    "key": "wallpaper"},
+    "შესაღები ფლიზერინი":   {"ka": "შესაღები ფლიზელინი", "en": "Paintable flizeline","ru": "Флизелин под покраску",   "key": "paintable"},
+    "Glue":                {"ka": "შპალერის წებო",      "en": "Wallpaper glue",     "ru": "Клей для обоев",          "key": "glue"},
 }
 EN_DESC = {
     "wallpaper": [
@@ -66,6 +68,25 @@ EN_DESC = {
         "Easy to mix & use",
         "Strong adhesion",
         "Ideal for all wallpaper types",
+    ],
+}
+RU_DESC = {
+    "wallpaper": [
+        "Винил на флизелиновой основе",
+        "Моющиеся и влагостойкие",
+        "Легко клеить",
+        "Большой выбор современных и классических дизайнов",
+    ],
+    "paintable": [
+        "Поверхность под покраску",
+        "Легко клеить",
+    ],
+    "glue": [
+        "Покрытие: 70–75 м²",
+        "Универсальный клей для обоев",
+        "Легко разводить и использовать",
+        "Прочное сцепление",
+        "Подходит для всех типов обоев",
     ],
 }
 
@@ -99,9 +120,8 @@ def price_html(old, new, lang):
         s = str(v).replace("₾", "").strip()
         m = re.match(r"(\d+)", s)
         num = f"{m.group(1)} ₾" if m else s
-        tag_ka = "საბითუმო" if "საბითუმო" in str(v) else ""
-        tag_en = "wholesale" if "საბითუმო" in str(v) else ""
-        tag = tag_ka if lang == "ka" else tag_en
+        has_tag = "საბითუმო" in str(v)
+        tag = {"ka": "საბითუმო", "en": "wholesale", "ru": "опт"}.get(lang, "") if has_tag else ""
         return f'{num} <span class="ptag">{tag}</span>' if tag else num
     new_s = fmt(new)
     old_s = fmt(old)
@@ -167,12 +187,13 @@ def read_categories():
         no = str(no).strip().zfill(2)
         if not no.isdigit():
             continue
-        tinfo = TYPE_MAP.get(str(typ).strip(), {"ka": str(typ), "en": str(typ), "key": "wallpaper"})
+        tinfo = TYPE_MAP.get(str(typ).strip(), {"ka": str(typ), "en": str(typ), "ru": str(typ), "key": "wallpaper"})
         cats.append({
             "no": no,
-            "type_ka": tinfo["ka"], "type_en": tinfo["en"], "key": tinfo["key"],
+            "type_ka": tinfo["ka"], "type_en": tinfo["en"], "type_ru": tinfo.get("ru", tinfo["en"]), "key": tinfo["key"],
             "desc_ka": bullets_ka(desc),
             "desc_en": EN_DESC.get(tinfo["key"], []),
+            "desc_ru": RU_DESC.get(tinfo["key"], []),
             "size": clean_size(size),
             "old": old, "new": new,
         })
@@ -222,8 +243,12 @@ def build_items(cat):
     return items
 
 # ---------------------------------------------------------------- HTML fragments
-def i18n(ka, en, tag="span"):
-    return f'<{tag} class="ka">{ka}</{tag}><{tag} class="en">{en}</{tag}>'
+def i18n(ka, en, tag="span", ru=None):
+    if ru is None:
+        ru = en
+    return (f'<{tag} class="ka">{ka}</{tag}>'
+            f'<{tag} class="en">{en}</{tag}>'
+            f'<{tag} class="ru">{ru}</{tag}>')
 
 ICON_PATHS = {
     "phone": '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.5-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/>',
@@ -297,22 +322,24 @@ def header_html():
   <a class="brand" href="index.html">
     <span class="brand-mark"><img src="assets/img/mark.webp" alt="Eurodecor"></span>
     <span class="brand-text">
-      <strong>{i18n("ევროდეკორი","Eurodecor","span")}</strong>
-      {i18n("შპალერების მაღაზია","Wallpaper Store", "small")}
+      <strong>{i18n("ევროდეკორი","Eurodecor","span",ru="Евродекор")}</strong>
+      {i18n("შპალერების მაღაზია","Wallpaper Store","small",ru="Магазин обоев")}
     </span>
   </a>
-  <button id="langBtn" class="lang-btn" type="button" aria-label="Language">
-    <span class="ka">EN</span><span class="en">ქარ</span>
-  </button>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button type="button" class="lang-opt" data-lang-set="ka">ქარ</button>
+    <button type="button" class="lang-opt" data-lang-set="en">EN</button>
+    <button type="button" class="lang-opt" data-lang-set="ru">РУ</button>
+  </div>
 </header>'''
 
 def contact_bar():
     b = BIZ
     return f'''<nav class="contact-bar" aria-label="Contact">
-  <a href="tel:{esc(b['phone_tel'])}" class="cbtn cbtn-call" aria-label="დარეკვა · Call">{icon('phone')}<span>{i18n("დარეკვა","Call")}</span></a>
+  <a href="tel:{esc(b['phone_tel'])}" class="cbtn cbtn-call" aria-label="დარეკვა · Call">{icon('phone')}<span>{i18n("დარეკვა","Call",ru="Позвонить")}</span></a>
   <a href="https://wa.me/{esc(b['whatsapp'])}" class="cbtn cbtn-wa" target="_blank" rel="noopener" aria-label="WhatsApp">{icon('chat')}<span>WhatsApp</span></a>
   <a href="{esc(b['messenger'])}" class="cbtn cbtn-msg" target="_blank" rel="noopener" aria-label="Messenger">{icon('send')}<span>Messenger</span></a>
-  <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener" aria-label="მისამართი · Directions">{icon('pin')}<span>{i18n("მისამართი","Directions")}</span></a>
+  <a href="{esc(b['maps'])}" class="cbtn cbtn-map" target="_blank" rel="noopener" aria-label="მისამართი · Directions">{icon('pin')}<span>{i18n("მისამართი","Directions",ru="Маршрут")}</span></a>
   <a href="mailto:{esc(b['email'])}" class="cbtn cbtn-mail" aria-label="Email">{icon('mail')}<span>Email</span></a>
 </nav>'''
 
@@ -323,21 +350,21 @@ def calc_section():
       <div class="calc-head">
         <span class="calc-ic">{icon('ruler', 24)}</span>
         <div>
-          <h2 class="calc-title">{i18n("შპალერის კალკულატორი","Wallpaper calculator","span")}</h2>
-          <p class="calc-sub">{i18n("გამოთვალეთ რამდენი რულონი დაგჭირდებათ","Estimate how many rolls you need","span")}</p>
+          <h2 class="calc-title">{i18n("შპალერის კალკულატორი","Wallpaper calculator","span",ru="Калькулятор обоев")}</h2>
+          <p class="calc-sub">{i18n("გამოთვალეთ რამდენი რულონი დაგჭირდებათ","Estimate how many rolls you need","span",ru="Рассчитайте, сколько рулонов вам нужно")}</p>
         </div>
       </div>
       <div class="calc-grid">
-        <label class="calc-field"><span>{i18n("ოთახის სიგრძე (მ)","Room length (m)","span")}</span>
+        <label class="calc-field"><span>{i18n("ოთახის სიგრძე (მ)","Room length (m)","span",ru="Длина комнаты (м)")}</span>
           <input type="number" id="calcL" min="0" step="0.1" inputmode="decimal" placeholder="4"></label>
-        <label class="calc-field"><span>{i18n("ოთახის სიგანე (მ)","Room width (m)","span")}</span>
+        <label class="calc-field"><span>{i18n("ოთახის სიგანე (მ)","Room width (m)","span",ru="Ширина комнаты (м)")}</span>
           <input type="number" id="calcW" min="0" step="0.1" inputmode="decimal" placeholder="3"></label>
-        <label class="calc-field"><span>{i18n("კედლის სიმაღლე (მ)","Wall height (m)","span")}</span>
+        <label class="calc-field"><span>{i18n("კედლის სიმაღლე (მ)","Wall height (m)","span",ru="Высота стены (м)")}</span>
           <input type="number" id="calcH" min="0" step="0.1" inputmode="decimal" placeholder="2.7"></label>
-        <label class="calc-field"><span>{i18n("რულონის ზომა","Roll size","span")}</span>
+        <label class="calc-field"><span>{i18n("რულონის ზომა","Roll size","span",ru="Размер рулона")}</span>
           <select id="calcRW"><option value="1.06">1.06 m × 10 m</option><option value="0.53">0.53 m × 10 m</option></select></label>
       </div>
-      <button type="button" id="calcBtn" class="btn btn-gold calc-btn">{icon('ruler')}<span>{i18n("გამოთვლა","Calculate")}</span></button>
+      <button type="button" id="calcBtn" class="btn btn-gold calc-btn">{icon('ruler')}<span>{i18n("გამოთვლა","Calculate",ru="Рассчитать")}</span></button>
       <div class="calc-result" id="calcResult" hidden></div>
     </div>
   </div>
@@ -351,11 +378,11 @@ def map_section():
   <div class="container map-inner">
     <div class="map-head">
       <div>
-        <h2 class="map-title">{i18n("მისამართი","Address","span")}</h2>
-        <p class="map-addr">{i18n(b['address_ka'], b['address_en'],"span")}</p>
-        <p class="map-hours">{i18n(b['hours_ka'], b['hours_en'],"span")} <span class="open-status" data-openstatus></span></p>
+        <h2 class="map-title">{i18n("მისამართი","Address","span",ru="Адрес")}</h2>
+        <p class="map-addr">{i18n(b['address_ka'], b['address_en'],"span",ru=b['address_ru'])}</p>
+        <p class="map-hours">{i18n(b['hours_ka'], b['hours_en'],"span",ru=b['hours_ru'])} <span class="open-status" data-openstatus></span></p>
       </div>
-      <a href="{esc(b['maps'])}" class="btn btn-gold map-btn" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("რუკაზე ნახვა","View on map")}</span></a>
+      <a href="{esc(b['maps'])}" class="btn btn-gold map-btn" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("რუკაზე ნახვა","View on map",ru="Смотреть на карте")}</span></a>
     </div>
     <div class="map-frame">
       <iframe src="{embed}" width="100%" height="380" style="border:0" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Eurodecor — რუკა"></iframe>
@@ -369,22 +396,22 @@ def footer_html():
   <div class="foot-grid">
     <div>
       <span class="foot-mark"><img src="assets/img/mark.webp" alt="Eurodecor"></span>
-      <p class="foot-tag">{i18n("პირდაპირ ქარხნიდან · 25 წლიანი გამოცდილება","Factory-direct · 25 years of experience","span")}</p>
+      <p class="foot-tag">{i18n("პირდაპირ ქარხნიდან · 25 წლიანი გამოცდილება","Factory-direct · 25 years of experience","span",ru="Напрямую с фабрики · 25 лет опыта")}</p>
     </div>
     <div>
-      <h2>{i18n("კონტაქტი","Contact","span")}</h2>
-      <p>{i18n(b['address_ka'], b['address_en'],"span")}</p>
+      <h2>{i18n("კონტაქტი","Contact","span",ru="Контакты")}</h2>
+      <p>{i18n(b['address_ka'], b['address_en'],"span",ru=b['address_ru'])}</p>
       <p><a href="tel:{esc(b['phone_tel'])}">{esc(b['phone_display'])}</a></p>
       <p><a href="mailto:{esc(b['email'])}">{esc(b['email'])}</a></p>
-      <p>{i18n(b['hours_ka'], b['hours_en'],"span")} <span class="open-status" data-openstatus></span></p>
+      <p>{i18n(b['hours_ka'], b['hours_en'],"span",ru=b['hours_ru'])} <span class="open-status" data-openstatus></span></p>
     </div>
     <div>
-      <h2>{i18n("გვეწვიეთ","Visit us","span")}</h2>
-      <p><a href="{esc(b['maps'])}" target="_blank" rel="noopener">{i18n("რუკაზე ნახვა →","Open in Maps →","span")}</a></p>
+      <h2>{i18n("გვეწვიეთ","Visit us","span",ru="Посетите нас")}</h2>
+      <p><a href="{esc(b['maps'])}" target="_blank" rel="noopener">{i18n("რუკაზე ნახვა →","Open in Maps →","span",ru="Открыть на карте →")}</a></p>
       <p><a href="{esc(b['facebook'])}" target="_blank" rel="noopener">Facebook →</a></p>
     </div>
   </div>
-  <p class="copyright">© 2026 Eurodecor · {i18n("ყველა უფლება დაცულია","All rights reserved","span")}</p>
+  <p class="copyright">© 2026 Eurodecor · {i18n("ყველა უფლება დაცულია","All rights reserved","span",ru="Все права защищены")}</p>
 </footer>
 <div class="sticky-contact" aria-label="Quick contact">
   <a href="https://wa.me/{esc(b['whatsapp'])}" class="sc-btn sc-wa" target="_blank" rel="noopener" aria-label="WhatsApp">{icon('chat', 26)}</a>
@@ -395,13 +422,22 @@ def footer_html():
 LANG_JS = '''<script>
 (function(){
   var root=document.documentElement;
-  var saved=localStorage.getItem('lang')||'ka';
-  root.setAttribute('data-lang',saved);
-  var btn=document.getElementById('langBtn');
-  if(btn){btn.addEventListener('click',function(){
-    var cur=root.getAttribute('data-lang')==='en'?'ka':'en';
-    root.setAttribute('data-lang',cur);localStorage.setItem('lang',cur);
-  });}
+  var valid={ka:1,en:1,ru:1};
+  var saved=localStorage.getItem('lang');
+  if(!valid[saved])saved='ka';
+  var opts=document.querySelectorAll('[data-lang-set]');
+  function apply(l){
+    root.setAttribute('data-lang',l);
+    root.setAttribute('lang',l);
+    localStorage.setItem('lang',l);
+    for(var i=0;i<opts.length;i++){
+      opts[i].setAttribute('aria-pressed',opts[i].getAttribute('data-lang-set')===l?'true':'false');
+    }
+  }
+  apply(saved);
+  for(var i=0;i<opts.length;i++){
+    opts[i].addEventListener('click',function(){apply(this.getAttribute('data-lang-set'));});
+  }
 })();
 </script>'''
 
@@ -415,8 +451,8 @@ STATUS_JS = '''<script>
   h=h%24;
   var open=h>=10&&h<19;
   var html=open
-    ?'<span class="ka">ღიაა ახლა</span><span class="en">Open now</span>'
-    :'<span class="ka">დაკეტილია</span><span class="en">Closed</span>';
+    ?'<span class="ka">ღიაა ახლა</span><span class="en">Open now</span><span class="ru">Открыто</span>'
+    :'<span class="ka">დაკეტილია</span><span class="en">Closed</span><span class="ru">Закрыто</span>';
   for(var i=0;i<els.length;i++){
     els[i].className='open-status '+(open?'open-status--open':'open-status--closed');
     els[i].innerHTML=html;
@@ -430,14 +466,18 @@ CALC_JS = '''<script>
   if(!btn)return;
   var res=document.getElementById('calcResult');
   function num(id){var v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;}
-  function warn(ka,en){res.hidden=false;res.className='calc-result calc-result--warn';
-    res.innerHTML='<span class="ka">'+ka+'</span><span class="en">'+en+'</span>';}
+  function warn(ka,en,ru){res.hidden=false;res.className='calc-result calc-result--warn';
+    res.innerHTML='<span class="ka">'+ka+'</span><span class="en">'+en+'</span><span class="ru">'+ru+'</span>';}
+  function ruRolls(n){var m=n%10,h=n%100;
+    if(m===1&&h!==11)return 'рулон';
+    if(m>=2&&m<=4&&(h<10||h>=20))return 'рулона';
+    return 'рулонов';}
   function calc(){
     var L=num('calcL'),W=num('calcW'),H=num('calcH');
     var rw=parseFloat(document.getElementById('calcRW').value)||1.06;
     var rollLen=10;
-    if(L<=0||W<=0||H<=0){return warn('შეავსეთ ყველა ველი სწორად.','Please fill in all fields correctly.');}
-    if(H>rollLen){return warn('კედელი ძალიან მაღალია ამ რულონისთვის.','Wall is too tall for this roll.');}
+    if(L<=0||W<=0||H<=0){return warn('შეავსეთ ყველა ველი სწორად.','Please fill in all fields correctly.','Заполните все поля правильно.');}
+    if(H>rollLen){return warn('კედელი ძალიან მაღალია ამ რულონისთვის.','Wall is too tall for this roll.','Стена слишком высокая для этого рулона.');}
     var perimeter=2*(L+W);
     var strips=Math.ceil(perimeter/rw);
     var stripsPerRoll=Math.floor(rollLen/H);
@@ -446,11 +486,13 @@ CALC_JS = '''<script>
     res.hidden=false;res.className='calc-result';
     res.innerHTML=
       '<div class="calc-big"><span class="calc-num">'+rolls+'</span>'
-      +'<span class="ka">&nbsp;რულონი</span><span class="en">&nbsp;rolls</span></div>'
+      +'<span class="ka">&nbsp;რულონი</span><span class="en">&nbsp;rolls</span><span class="ru">&nbsp;'+ruRolls(rolls)+'</span></div>'
       +'<p class="calc-rec"><span class="ka">გირჩევთ აიღოთ '+withExtra+' რულონი — მარაგი ჭრისა და ნახატის დასამთხვევად.</span>'
-      +'<span class="en">We recommend buying '+withExtra+' rolls — one spare for cutting and pattern matching.</span></p>'
+      +'<span class="en">We recommend buying '+withExtra+' rolls — one spare for cutting and pattern matching.</span>'
+      +'<span class="ru">Рекомендуем купить '+withExtra+' '+ruRolls(withExtra)+' — один запасной для подрезки и подгонки рисунка.</span></p>'
       +'<p class="calc-hint"><span class="ka">პერიმეტრი ≈ '+perimeter.toFixed(1)+' მ · '+strips+' ზოლი · '+stripsPerRoll+' ზოლი / რულონი</span>'
-      +'<span class="en">Perimeter ≈ '+perimeter.toFixed(1)+' m · '+strips+' strips · '+stripsPerRoll+' strips / roll</span></p>';
+      +'<span class="en">Perimeter ≈ '+perimeter.toFixed(1)+' m · '+strips+' strips · '+stripsPerRoll+' strips / roll</span>'
+      +'<span class="ru">Периметр ≈ '+perimeter.toFixed(1)+' м · '+strips+' полос · '+stripsPerRoll+' полос / рулон</span></p>';
   }
   btn.addEventListener('click',calc);
   ['calcL','calcW','calcH'].forEach(function(id){
@@ -490,14 +532,14 @@ def render_home(cats):
     cards = []
     for c in cats:
         first_img = c.get("thumb", "assets/img/logo.webp")
-        badge = f'<span class="badge">{i18n("ფასდაკლება","Sale")}</span>' if c["old"] else ""
+        badge = f'<span class="badge">{i18n("ფასდაკლება","Sale",ru="Скидка")}</span>' if c["old"] else ""
         cards.append(f'''<a class="cat-card" href="category-{c['no']}.html">
       <div class="cat-thumb">{badge}
         <img loading="lazy" decoding="async" width="520" height="693" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}">
       </div>
       <div class="cat-body">
-        <span class="cat-type">{i18n(c['type_ka'], c['type_en'])}</span>
-        <div class="price-wrap"><span class="ka">{price_html(c["old"], c["new"], "ka")}</span><span class="en">{price_html(c["old"], c["new"], "en")}</span></div>
+        <span class="cat-type">{i18n(c['type_ka'], c['type_en'],ru=c['type_ru'])}</span>
+        <div class="price-wrap"><span class="ka">{price_html(c["old"], c["new"], "ka")}</span><span class="en">{price_html(c["old"], c["new"], "en")}</span><span class="ru">{price_html(c["old"], c["new"], "ru")}</span></div>
         <span class="cat-size">{esc(c['size'])} · #{c['no']}</span>
       </div>
     </a>''')
@@ -506,14 +548,14 @@ def render_home(cats):
     {sprig_svg()}
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="hero-over">{i18n("· 25 წლიანი გამოცდილება ·","· EST. 25 YEARS ·","span")}</span>
-        <h1>{i18n("ევროდეკორი","Eurodecor","span")}</h1>
+        <span class="hero-over">{i18n("· 25 წლიანი გამოცდილება ·","· EST. 25 YEARS ·","span",ru="· 25 ЛЕТ ОПЫТА ·")}</span>
+        <h1>{i18n("ევროდეკორი","Eurodecor","span",ru="Евродекор")}</h1>
         {leaf_div(light=True)}
-        <p class="hero-sub">{i18n("შპალერების მაღაზია","Wallpaper Store","span")}</p>
-        <p class="hero-usp">{i18n("პირდაპირ ქარხნიდან · საუკეთესო ფასები თბილისში · დიდი არჩევანი","Factory-direct · best prices in Tbilisi · huge selection","span")}</p>
+        <p class="hero-sub">{i18n("შპალერების მაღაზია","Wallpaper Store","span",ru="Магазин обоев")}</p>
+        <p class="hero-usp">{i18n("პირდაპირ ქარხნიდან · საუკეთესო ფასები თბილისში · დიდი არჩევანი","Factory-direct · best prices in Tbilisi · huge selection","span",ru="Напрямую с фабрики · лучшие цены в Тбилиси · огромный выбор")}</p>
         <div class="hero-cta">
-          <a class="btn btn-gold" href="https://wa.me/{esc(BIZ['whatsapp'])}" target="_blank" rel="noopener">{icon('chat')}<span>{i18n("მოგვწერეთ","Message us")}</span></a>
-          <a class="btn btn-ghost" href="#categories">{i18n("კატალოგის ნახვა","Browse catalog")}</a>
+          <a class="btn btn-gold" href="https://wa.me/{esc(BIZ['whatsapp'])}" target="_blank" rel="noopener">{icon('chat')}<span>{i18n("მოგვწერეთ","Message us",ru="Напишите нам")}</span></a>
+          <a class="btn btn-ghost" href="#categories">{i18n("კატალოგის ნახვა","Browse catalog",ru="Смотреть каталог")}</a>
         </div>
       </div>
       <div class="hero-art"><img src="assets/img/hero.webp" width="1000" height="762" fetchpriority="high" decoding="async" alt="Eurodecor — ევროდეკორის შპალერები"></div>
@@ -523,7 +565,7 @@ def render_home(cats):
 {hero}
 {contact_bar()}
 <main class="container">
-  <h2 class="section-title" id="categories">{i18n("კატეგორიები","Categories","span")}</h2>
+  <h2 class="section-title" id="categories">{i18n("კატეგორიები","Categories","span",ru="Категории")}</h2>
   {leaf_div(center=True)}
   <div class="cat-grid">
     {grid}
@@ -554,24 +596,26 @@ def render_category(c):
       </div>
       <figcaption>#{it['num']}</figcaption>
     </figure>''')
-    grid = "\n".join(items) if items else f'<p class="muted">{i18n("ფოტოები მალე","Photos coming soon")}</p>'
+    grid = "\n".join(items) if items else f'<p class="muted">{i18n("ფოტოები მალე","Photos coming soon",ru="Фото скоро")}</p>'
 
     d_ka = "".join(f"<li>{esc(x)}</li>" for x in c["desc_ka"])
     d_en = "".join(f"<li>{esc(x)}</li>" for x in c["desc_en"])
-    badge = f'<span class="badge badge-dark">{i18n("ფასდაკლება","Sale")}</span>' if c["old"] else ""
+    d_ru = "".join(f"<li>{esc(x)}</li>" for x in c["desc_ru"])
+    badge = f'<span class="badge badge-dark">{i18n("ფასდაკლება","Sale",ru="Скидка")}</span>' if c["old"] else ""
 
     intro = f'''<section class="cat-head">
-    <nav class="crumb"><a href="index.html">{i18n("მთავარი","Home")}</a> <span>/</span> #{c['no']}</nav>
-    <span class="cat-over">{i18n(c['type_ka'], c['type_en'])} · #{c['no']}</span>
-    <h1 class="cat-title">{i18n(c['type_ka'], c['type_en'],"span")}</h1>
+    <nav class="crumb"><a href="index.html">{i18n("მთავარი","Home",ru="Главная")}</a> <span>/</span> #{c['no']}</nav>
+    <span class="cat-over">{i18n(c['type_ka'], c['type_en'],ru=c['type_ru'])} · #{c['no']}</span>
+    <h1 class="cat-title">{i18n(c['type_ka'], c['type_en'],"span",ru=c['type_ru'])}</h1>
     {leaf_div(center=True)}
     <div class="cat-price">{badge}
-      <span class="ka">{price_html(c['old'], c['new'], 'ka')}</span><span class="en">{price_html(c['old'], c['new'], 'en')}</span>
+      <span class="ka">{price_html(c['old'], c['new'], 'ka')}</span><span class="en">{price_html(c['old'], c['new'], 'en')}</span><span class="ru">{price_html(c['old'], c['new'], 'ru')}</span>
     </div>
     <p class="cat-size-big">{esc(c['size'])}</p>
     <ul class="feat ka">{d_ka}</ul>
     <ul class="feat en">{d_en}</ul>
-    <p class="order-hint">{i18n("მოგწონთ რომელიმე? მოგვწერეთ ნომერი (მაგ. #"+c['no']+"01) Messenger-ში ან WhatsApp-ში.","Like one? Message us the number (e.g. #"+c['no']+"01) on Messenger or WhatsApp.")}</p>
+    <ul class="feat ru">{d_ru}</ul>
+    <p class="order-hint">{i18n("მოგწონთ რომელიმე? მოგვწერეთ ნომერი (მაგ. #"+c['no']+"01) Messenger-ში ან WhatsApp-ში.","Like one? Message us the number (e.g. #"+c['no']+"01) on Messenger or WhatsApp.",ru="Понравился какой-то? Напишите нам номер (напр. #"+c['no']+"01) в Messenger или WhatsApp.")}</p>
   </section>'''
 
     lightbox = f'''<div class="lb" id="lb" aria-hidden="true">
@@ -589,7 +633,7 @@ def render_category(c):
   <div class="item-grid">
     {grid}
   </div>
-  <p class="back"><a href="index.html">← {i18n("ყველა კატეგორია","All categories")}</a></p>
+  <p class="back"><a href="index.html">← {i18n("ყველა კატეგორია","All categories",ru="Все категории")}</a></p>
 </main>
 {footer_html()}
 {lightbox}
@@ -634,8 +678,9 @@ a{{color:inherit;text-decoration:none}}
 .container{{max-width:1160px;margin:0 auto;padding:0 22px}}
 
 /* language toggle */
-html[data-lang="ka"] .en{{display:none !important}}
-html[data-lang="en"] .ka{{display:none !important}}
+html[data-lang="ka"] .en,html[data-lang="ka"] .ru{{display:none !important}}
+html[data-lang="en"] .ka,html[data-lang="en"] .ru{{display:none !important}}
+html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
 
 /* gold leaf divider (echoes the logo lockup) */
 .leaf-div{{display:flex;align-items:center;gap:12px;margin:16px 0}}
@@ -658,9 +703,12 @@ html[data-lang="en"] .ka{{display:none !important}}
 .brand-text{{display:flex;flex-direction:column;line-height:1.05}}
 .brand-text strong{{font-family:var(--serif);font-size:1.3rem;font-weight:700;letter-spacing:.3px;color:var(--plum)}}
 .brand-text small{{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:3px}}
-.lang-btn{{background:transparent;color:var(--plum);border:1px solid var(--plum);
-  padding:7px 16px;border-radius:999px;font-weight:600;cursor:pointer;font-size:.82rem;letter-spacing:.05em;transition:.16s}}
-.lang-btn:hover{{background:var(--plum);color:#fff}}
+.lang-switch{{display:inline-flex;border:1px solid var(--plum);border-radius:999px;overflow:hidden}}
+.lang-opt{{background:transparent;color:var(--plum);border:0;padding:6px 11px;font-weight:600;cursor:pointer;
+  font-size:.78rem;letter-spacing:.04em;transition:.15s;font-family:inherit;line-height:1.2}}
+.lang-opt+.lang-opt{{border-left:1px solid rgba(70,28,93,.25)}}
+.lang-opt:hover{{background:rgba(70,28,93,.09)}}
+.lang-opt[aria-pressed="true"]{{background:var(--plum);color:#fff}}
 
 /* hero */
 .hero{{position:relative;overflow:hidden;color:#fff;
