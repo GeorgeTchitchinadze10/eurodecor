@@ -30,10 +30,16 @@
       <small class="ka">შპალერების მაღაზია</small><small class="en">Wallpaper Store</small><small class="ru">Магазин обоев</small>
     </span>
   </a>
-  <div class="lang-switch" role="group" aria-label="Language">
-    <button type="button" class="lang-opt" data-lang-set="ka">ქარ</button>
-    <button type="button" class="lang-opt" data-lang-set="en">EN</button>
-    <button type="button" class="lang-opt" data-lang-set="ru">РУ</button>
+  <div class="lang-dd" data-langdd>
+    <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+      <span class="lang-cur"><span class="ka">ქართული</span><span class="en">English</span><span class="ru">Русский</span></span>
+      <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <ul class="lang-menu" role="listbox" hidden>
+      <li><button type="button" role="option" class="lang-item" data-lang-set="ka">ქართული</button></li>
+      <li><button type="button" role="option" class="lang-item" data-lang-set="en">English</button></li>
+      <li><button type="button" role="option" class="lang-item" data-lang-set="ru">Русский</button></li>
+    </ul>
   </div>
 </header>
 <nav class="contact-bar" aria-label="Contact">
@@ -146,19 +152,29 @@
   var valid={ka:1,en:1,ru:1};
   var saved=localStorage.getItem('lang');
   if(!valid[saved])saved='ka';
-  var opts=document.querySelectorAll('[data-lang-set]');
+  var btn=document.getElementById('langBtn');
+  var menu=document.querySelector('.lang-menu');
+  var items=document.querySelectorAll('[data-lang-set]');
   function apply(l){
     root.setAttribute('data-lang',l);
     root.setAttribute('lang',l);
     localStorage.setItem('lang',l);
-    for(var i=0;i<opts.length;i++){
-      opts[i].setAttribute('aria-pressed',opts[i].getAttribute('data-lang-set')===l?'true':'false');
+    for(var i=0;i<items.length;i++){
+      items[i].setAttribute('aria-selected',items[i].getAttribute('data-lang-set')===l?'true':'false');
     }
   }
-  apply(saved);
-  for(var i=0;i<opts.length;i++){
-    opts[i].addEventListener('click',function(){apply(this.getAttribute('data-lang-set'));});
+  function setOpen(o){
+    if(!menu||!btn)return;
+    menu.hidden=!o;
+    btn.setAttribute('aria-expanded',o?'true':'false');
   }
+  apply(saved);
+  if(btn){btn.addEventListener('click',function(e){e.stopPropagation();setOpen(menu.hidden);});}
+  for(var i=0;i<items.length;i++){
+    items[i].addEventListener('click',function(e){e.stopPropagation();apply(this.getAttribute('data-lang-set'));setOpen(false);});
+  }
+  document.addEventListener('click',function(){setOpen(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});
 })();
 </script>
 <script>

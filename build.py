@@ -258,6 +258,7 @@ ICON_PATHS = {
     "mail": '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
     "chevL": '<polyline points="15 18 9 12 15 6"/>',
     "chevR": '<polyline points="9 18 15 12 9 6"/>',
+    "chevD": '<polyline points="6 9 12 15 18 9"/>',
     "close": '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
     "zoom": '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>',
     "ruler": '<path d="M2.5 15.5 15.5 2.5a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L8.5 21.5a2 2 0 0 1-2.8 0l-3.2-3.2a2 2 0 0 1 0-2.8z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/>',
@@ -326,10 +327,16 @@ def header_html():
       {i18n("შპალერების მაღაზია","Wallpaper Store","small",ru="Магазин обоев")}
     </span>
   </a>
-  <div class="lang-switch" role="group" aria-label="Language">
-    <button type="button" class="lang-opt" data-lang-set="ka">ქარ</button>
-    <button type="button" class="lang-opt" data-lang-set="en">EN</button>
-    <button type="button" class="lang-opt" data-lang-set="ru">РУ</button>
+  <div class="lang-dd" data-langdd>
+    <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+      <span class="lang-cur"><span class="ka">ქართული</span><span class="en">English</span><span class="ru">Русский</span></span>
+      {icon('chevD', 16)}
+    </button>
+    <ul class="lang-menu" role="listbox" hidden>
+      <li><button type="button" role="option" class="lang-item" data-lang-set="ka">ქართული</button></li>
+      <li><button type="button" role="option" class="lang-item" data-lang-set="en">English</button></li>
+      <li><button type="button" role="option" class="lang-item" data-lang-set="ru">Русский</button></li>
+    </ul>
   </div>
 </header>'''
 
@@ -425,19 +432,29 @@ LANG_JS = '''<script>
   var valid={ka:1,en:1,ru:1};
   var saved=localStorage.getItem('lang');
   if(!valid[saved])saved='ka';
-  var opts=document.querySelectorAll('[data-lang-set]');
+  var btn=document.getElementById('langBtn');
+  var menu=document.querySelector('.lang-menu');
+  var items=document.querySelectorAll('[data-lang-set]');
   function apply(l){
     root.setAttribute('data-lang',l);
     root.setAttribute('lang',l);
     localStorage.setItem('lang',l);
-    for(var i=0;i<opts.length;i++){
-      opts[i].setAttribute('aria-pressed',opts[i].getAttribute('data-lang-set')===l?'true':'false');
+    for(var i=0;i<items.length;i++){
+      items[i].setAttribute('aria-selected',items[i].getAttribute('data-lang-set')===l?'true':'false');
     }
   }
-  apply(saved);
-  for(var i=0;i<opts.length;i++){
-    opts[i].addEventListener('click',function(){apply(this.getAttribute('data-lang-set'));});
+  function setOpen(o){
+    if(!menu||!btn)return;
+    menu.hidden=!o;
+    btn.setAttribute('aria-expanded',o?'true':'false');
   }
+  apply(saved);
+  if(btn){btn.addEventListener('click',function(e){e.stopPropagation();setOpen(menu.hidden);});}
+  for(var i=0;i<items.length;i++){
+    items[i].addEventListener('click',function(e){e.stopPropagation();apply(this.getAttribute('data-lang-set'));setOpen(false);});
+  }
+  document.addEventListener('click',function(){setOpen(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});
 })();
 </script>'''
 
@@ -703,12 +720,23 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
 .brand-text{{display:flex;flex-direction:column;line-height:1.05}}
 .brand-text strong{{font-family:var(--serif);font-size:1.3rem;font-weight:700;letter-spacing:.3px;color:var(--plum)}}
 .brand-text small{{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:3px}}
-.lang-switch{{display:inline-flex;border:1px solid var(--plum);border-radius:999px;overflow:hidden}}
-.lang-opt{{background:transparent;color:var(--plum);border:0;padding:6px 11px;font-weight:600;cursor:pointer;
-  font-size:.78rem;letter-spacing:.04em;transition:.15s;font-family:inherit;line-height:1.2}}
-.lang-opt+.lang-opt{{border-left:1px solid rgba(70,28,93,.25)}}
-.lang-opt:hover{{background:rgba(70,28,93,.09)}}
-.lang-opt[aria-pressed="true"]{{background:var(--plum);color:#fff}}
+.lang-dd{{position:relative}}
+.lang-btn{{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--plum);
+  border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-family:inherit;font-weight:600;
+  font-size:.85rem;cursor:pointer;transition:.15s;line-height:1.2}}
+.lang-btn:hover{{border-color:var(--plum)}}
+.lang-btn .ic{{transition:transform .2s}}
+.lang-btn[aria-expanded="true"]{{border-color:var(--plum)}}
+.lang-btn[aria-expanded="true"] .ic{{transform:rotate(180deg)}}
+.lang-menu{{position:absolute;right:0;top:calc(100% + 6px);margin:0;padding:5px;list-style:none;
+  background:#fff;border:1px solid var(--line);border-radius:12px;min-width:158px;
+  box-shadow:0 12px 30px rgba(70,28,93,.18);z-index:60}}
+.lang-menu[hidden]{{display:none}}
+.lang-menu li{{margin:0}}
+.lang-item{{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:8px;
+  padding:9px 12px;font-family:inherit;font-size:.9rem;font-weight:500;color:var(--ink);cursor:pointer;transition:.12s}}
+.lang-item:hover{{background:var(--cream)}}
+.lang-item[aria-selected="true"]{{background:var(--plum);color:#fff;font-weight:600}}
 
 /* hero */
 .hero{{position:relative;overflow:hidden;color:#fff;
