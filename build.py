@@ -317,8 +317,8 @@ def contact_bar():
 
 def map_section():
     b = BIZ
-    query = "130+Akaki+Tsereteli+Avenue,+Tbilisi+0119"
-    embed = f"https://www.google.com/maps?q={query}&z=16&output=embed&hl=ka"
+    coords = "41.74599397323277,44.777773328922635"
+    embed = f"https://www.google.com/maps?q={coords}&z=17&output=embed&hl=ka"
     return f'''<section class="map-section" aria-label="Location">
   <div class="container map-inner">
     <div class="map-head">
