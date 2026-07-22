@@ -39,8 +39,11 @@ BIZ = {
     "hours_ka": "ყოველდღე 10:00 – 19:00",
     "hours_en": "Every day 10:00 – 19:00",
     "hours_ru": "Ежедневно 10:00 – 19:00",
-    "site_url": "https://georgetchitchinadze10.github.io/eurodecor",
+    "site_url": "https://eurodecor.com.ge",
 }
+
+# custom domain written to docs/CNAME on every build
+CUSTOM_DOMAIN = "eurodecor.com.ge"
 
 C_PRIMARY = "#461c5d"
 C_SECOND  = "#d1c2b9"
@@ -957,6 +960,9 @@ def main():
     os.makedirs(IMG_OUT, exist_ok=True)
     # .nojekyll so GitHub Pages serves everything as-is
     open(os.path.join(OUT, ".nojekyll"), "w").close()
+    # CNAME so a rebuild never drops the custom-domain binding
+    with open(os.path.join(OUT, "CNAME"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(CUSTOM_DOMAIN + "\n")
 
     # full logo (favicon / schema / social) + cropped emblem chip for the header & footer
     optimize_logo(LOGO_SRC, os.path.join(IMG_OUT, "logo.webp"))
