@@ -480,6 +480,12 @@ STATUS_JS = '''<script>
 })();
 </script>'''
 
+# Cloudflare Web Analytics — privacy-first, no cookies, no consent banner
+ANALYTICS = ('<!-- Cloudflare Web Analytics -->'
+  '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" '
+  'data-cf-beacon=\'{"token": "a14e153b08084af595898b33aef479fe"}\'></script>'
+  '<!-- End Cloudflare Web Analytics -->')
+
 CALC_JS = '''<script>
 (function(){
   var btn=document.getElementById('calcBtn');
@@ -603,6 +609,7 @@ def render_home(cats):
 {head(title_ka, title_en, desc, BIZ["site_url"] + "/", preload_img="assets/img/hero.webp")}
 </head><body>
 {body}
+{ANALYTICS}
 </body></html>'''
 
 # ---------------------------------------------------------------- page: category
@@ -667,6 +674,7 @@ def render_category(c):
 {head(title_ka, title_en, desc, canonical)}
 </head><body>
 {body}
+{ANALYTICS}
 </body></html>'''
 
 # ---------------------------------------------------------------- CSS
