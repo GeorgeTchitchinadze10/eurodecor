@@ -31,16 +31,22 @@
       <small class="ka">შპალერების მაღაზია</small><small class="en">Wallpaper Store</small><small class="ru">Магазин обоев</small>
     </span>
   </a>
-  <div class="lang-dd" data-langdd>
-    <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
-      <span class="lang-cur"><span class="ka">ქართული</span><span class="en">English</span><span class="ru">Русский</span></span>
-      <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+  <div class="head-actions">
+    <button type="button" class="fav-open" id="favOpen" aria-label="შენახული · Shortlist">
+      <span class="fav-open-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.7-7.5 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+      <span class="fav-count" data-favcount data-empty="1">0</span>
     </button>
-    <ul class="lang-menu" role="listbox" hidden>
-      <li><button type="button" role="option" class="lang-item" data-lang-set="ka">ქართული</button></li>
-      <li><button type="button" role="option" class="lang-item" data-lang-set="en">English</button></li>
-      <li><button type="button" role="option" class="lang-item" data-lang-set="ru">Русский</button></li>
-    </ul>
+    <div class="lang-dd" data-langdd>
+      <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+        <span class="lang-cur"><span class="ka">ქართული</span><span class="en">English</span><span class="ru">Русский</span></span>
+        <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <ul class="lang-menu" role="listbox" hidden>
+        <li><button type="button" role="option" class="lang-item" data-lang-set="ka">ქართული</button></li>
+        <li><button type="button" role="option" class="lang-item" data-lang-set="en">English</button></li>
+        <li><button type="button" role="option" class="lang-item" data-lang-set="ru">Русский</button></li>
+      </ul>
+    </div>
   </div>
 </header>
 <section class="hero">
@@ -70,8 +76,16 @@
 <main class="container">
   <h2 class="section-title" id="categories"><span class="ka">კატეგორიები</span><span class="en">Categories</span><span class="ru">Категории</span></h2>
   <span class="leaf-div center"><i></i><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C7.5 6 6 11.5 9 17c.6 1.1 1.7 2.4 3 5 1.3-2.6 2.4-3.9 3-5 3-5.5 1.5-11-3-15z"/><path d="M12 6v11" stroke="rgba(0,0,0,.18)" stroke-width="1" fill="none"/></svg><i></i></span>
-  <div class="cat-grid">
-    <a class="cat-card" href="category-01.html">
+  <div class="filter-bar" id="filterBar">
+    <div class="chip-row"><button type="button" class="chip is-active" data-filter="all"><span class="ka">ყველა</span><span class="en">All</span><span class="ru">Все</span></button><button type="button" class="chip" data-filter="wallpaper"><span class="ka">შპალერი</span><span class="en">Wallpaper</span><span class="ru">Обои</span></button><button type="button" class="chip" data-filter="paintable"><span class="ka">შესაღები</span><span class="en">Paintable</span><span class="ru">Под покраску</span></button><button type="button" class="chip" data-filter="glue"><span class="ka">წებო</span><span class="en">Glue</span><span class="ru">Клей</span></button><button type="button" class="chip chip-sale" data-filter="sale"><span class="ka">ფასდაკლება</span><span class="en">On sale</span><span class="ru">Скидка</span></button></div>
+    <div class="chip-row sort-row">
+      <span class="sort-label"><span class="ka">დახარისხება</span><span class="en">Sort</span><span class="ru">Сортировка</span></span>
+      <button type="button" class="chip" data-sort="price-asc"><span class="ka">იაფი ჯერ</span><span class="en">Price ↑</span><span class="ru">Сначала дешёвые</span></button>
+      <button type="button" class="chip" data-sort="price-desc"><span class="ka">ძვირი ჯერ</span><span class="en">Price ↓</span><span class="ru">Сначала дорогие</span></button>
+    </div>
+  </div>
+  <div class="cat-grid" id="catGrid">
+    <a class="cat-card" href="category-01.html" data-type="wallpaper" data-price="65" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-01.webp" alt="Wallpaper 01">
       </div>
@@ -81,7 +95,7 @@
         <span class="cat-size">1.06m × 10m · #01</span>
       </div>
     </a>
-<a class="cat-card" href="category-02.html">
+<a class="cat-card" href="category-02.html" data-type="wallpaper" data-price="55" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-02.webp" alt="Wallpaper 02">
       </div>
@@ -91,7 +105,7 @@
         <span class="cat-size">1.06m × 10m · #02</span>
       </div>
     </a>
-<a class="cat-card" href="category-03.html">
+<a class="cat-card" href="category-03.html" data-type="wallpaper" data-price="75" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-03.webp" alt="Wallpaper 03">
       </div>
@@ -101,7 +115,7 @@
         <span class="cat-size">1.06m × 10m · #03</span>
       </div>
     </a>
-<a class="cat-card" href="category-04.html">
+<a class="cat-card" href="category-04.html" data-type="wallpaper" data-price="40" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-04.webp" alt="Wallpaper 04">
       </div>
@@ -111,7 +125,7 @@
         <span class="cat-size">1.06m × 10m · #04</span>
       </div>
     </a>
-<a class="cat-card" href="category-05.html">
+<a class="cat-card" href="category-05.html" data-type="wallpaper" data-price="15" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-05.webp" alt="Wallpaper 05">
       </div>
@@ -121,7 +135,7 @@
         <span class="cat-size">0.53m × 10m · #05</span>
       </div>
     </a>
-<a class="cat-card" href="category-06.html">
+<a class="cat-card" href="category-06.html" data-type="wallpaper" data-price="18" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-06.webp" alt="Wallpaper 06">
       </div>
@@ -131,7 +145,7 @@
         <span class="cat-size">0.53m × 10m · #06</span>
       </div>
     </a>
-<a class="cat-card" href="category-07.html">
+<a class="cat-card" href="category-07.html" data-type="wallpaper" data-price="20" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-07.webp" alt="Wallpaper 07">
       </div>
@@ -141,7 +155,7 @@
         <span class="cat-size">1.06m × 10m · #07</span>
       </div>
     </a>
-<a class="cat-card" href="category-08.html">
+<a class="cat-card" href="category-08.html" data-type="paintable" data-price="60" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-08.webp" alt="Paintable flizeline 08">
       </div>
@@ -151,7 +165,7 @@
         <span class="cat-size">1.06m × 10m · #08</span>
       </div>
     </a>
-<a class="cat-card" href="category-09.html">
+<a class="cat-card" href="category-09.html" data-type="paintable" data-price="50" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-09.webp" alt="Paintable flizeline 09">
       </div>
@@ -161,7 +175,7 @@
         <span class="cat-size">1.06m × 10m · #09</span>
       </div>
     </a>
-<a class="cat-card" href="category-10.html">
+<a class="cat-card" href="category-10.html" data-type="glue" data-price="10" data-sale="0">
       <div class="cat-thumb">
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-10.webp" alt="Wallpaper glue 10">
       </div>
@@ -171,7 +185,7 @@
         <span class="cat-size">70-75m² 500g · #10</span>
       </div>
     </a>
-<a class="cat-card" href="category-11.html">
+<a class="cat-card" href="category-11.html" data-type="wallpaper" data-price="5" data-sale="1">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-11.webp" alt="Wallpaper 11">
       </div>
@@ -202,6 +216,8 @@
           <input type="number" id="calcH" min="0" step="0.1" inputmode="decimal" placeholder="2.7"></label>
         <label class="calc-field"><span><span class="ka">რულონის ზომა</span><span class="en">Roll size</span><span class="ru">Размер рулона</span></span>
           <select id="calcRW"><option value="1.06">1.06 m × 10 m</option><option value="0.53">0.53 m × 10 m</option></select></label>
+        <label class="calc-field"><span><span class="ka">რულონის ფასი (არჩევითი)</span><span class="en">Roll price (optional)</span><span class="ru">Цена рулона (необязательно)</span></span>
+          <select id="calcPrice"><option value="">—</option><option value="65">#01 · 65 ₾</option><option value="55">#02 · 55 ₾</option><option value="75">#03 · 75 ₾</option><option value="40">#04 · 40 ₾</option><option value="15">#05 · 15 ₾</option><option value="18">#06 · 18 ₾</option><option value="20">#07 · 20 ₾</option><option value="60">#08 · 60 ₾</option><option value="50">#09 · 50 ₾</option><option value="10">#10 · 10 ₾</option><option value="5">#11 · 5 ₾</option></select></label>
       </div>
       <button type="button" id="calcBtn" class="btn btn-gold calc-btn"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 15.5 15.5 2.5a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L8.5 21.5a2 2 0 0 1-2.8 0l-3.2-3.2a2 2 0 0 1 0-2.8z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/></svg><span><span class="ka">გამოთვლა</span><span class="en">Calculate</span><span class="ru">Рассчитать</span></span></button>
       <div class="calc-result" id="calcResult" hidden></div>
@@ -247,6 +263,17 @@
 <div class="sticky-contact" aria-label="Quick contact">
   <a href="https://wa.me/995599922749" class="sc-btn sc-wa" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.9-.9L3 20l1.3-3.9A8.4 8.4 0 1 1 21 11.5z"/></svg></a>
   <a href="tel:+995599922749" class="sc-btn sc-call" aria-label="დარეკვა · Call"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.5-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
+</div>
+<div class="fav-drawer" id="favDrawer" aria-hidden="true">
+  <aside class="fav-panel" role="dialog" aria-label="შენახული ნიმუშები">
+    <div class="fav-head">
+      <h2><span class="ka">შენახული ნიმუშები</span><span class="en">Saved patterns</span><span class="ru">Сохранённые образцы</span></h2>
+      <button type="button" class="fav-close" id="favClose" aria-label="დახურვა · Close"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="fav-list" id="favList"></div>
+    <p class="fav-empty" id="favEmpty"><span class="ka">ჯერ არაფერია შენახული. დააჭირეთ ♡ ნებისმიერ ნიმუშზე.</span><span class="en">Nothing saved yet. Tap ♡ on any pattern.</span><span class="ru">Пока ничего не сохранено. Нажмите ♡ на любом образце.</span></p>
+    <a class="btn btn-gold fav-wa" id="favWa" target="_blank" rel="noopener" href="https://wa.me/995599922749"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.9-.9L3 20l1.3-3.9A8.4 8.4 0 1 1 21 11.5z"/></svg><span><span class="ka">გაგზავნა WhatsApp-ით</span><span class="en">Send via WhatsApp</span><span class="ru">Отправить в WhatsApp</span></span></a>
+  </aside>
 </div>
 <script>
 (function(){
@@ -320,10 +347,24 @@
     var stripsPerRoll=Math.floor(rollLen/H);
     var rolls=Math.ceil(strips/stripsPerRoll);
     var withExtra=rolls+1;
+    var pEl=document.getElementById('calcPrice');
+    var price=pEl?(parseFloat(pEl.value)||0):0;
+    var totalHtml='';
+    if(price>0){
+      var total=rolls*price,totalRec=withExtra*price;
+      totalHtml='<div class="calc-total">'
+        +'<span class="ka">სავარაუდო ღირებულება <b>'+total+' ₾</b></span>'
+        +'<span class="en">Estimated cost <b>'+total+' ₾</b></span>'
+        +'<span class="ru">Примерная стоимость <b>'+total+' ₾</b></span>'
+        +'<em class="calc-total-rec"><span class="ka">'+withExtra+' რულონით (მარაგით) — '+totalRec+' ₾</span>'
+        +'<span class="en">with '+withExtra+' rolls (incl. spare) — '+totalRec+' ₾</span>'
+        +'<span class="ru">с '+withExtra+' '+ruRolls(withExtra)+' (с запасом) — '+totalRec+' ₾</span></em></div>';
+    }
     res.hidden=false;res.className='calc-result';
     res.innerHTML=
       '<div class="calc-big"><span class="calc-num">'+rolls+'</span>'
       +'<span class="ka">&nbsp;რულონი</span><span class="en">&nbsp;rolls</span><span class="ru">&nbsp;'+ruRolls(rolls)+'</span></div>'
+      +totalHtml
       +'<p class="calc-rec"><span class="ka">გირჩევთ აიღოთ '+withExtra+' რულონი — მარაგი ჭრისა და ნახატის დასამთხვევად.</span>'
       +'<span class="en">We recommend buying '+withExtra+' rolls — one spare for cutting and pattern matching.</span>'
       +'<span class="ru">Рекомендуем купить '+withExtra+' '+ruRolls(withExtra)+' — один запасной для подрезки и подгонки рисунка.</span></p>'
@@ -334,6 +375,100 @@
   btn.addEventListener('click',calc);
   ['calcL','calcW','calcH'].forEach(function(id){
     document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')calc();});
+  });
+})();
+</script>
+<script>
+(function(){
+  var KEY='eurodecorFavs';
+  function read(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return [];}}
+  function write(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}}
+  function idxOf(a,num){for(var i=0;i<a.length;i++){if(a[i].num===num)return i;}return -1;}
+  var favs=read();
+  var counts=document.querySelectorAll('[data-favcount]');
+  function updateCount(){for(var i=0;i<counts.length;i++){counts[i].textContent=favs.length;counts[i].setAttribute('data-empty',favs.length?'0':'1');}}
+  function syncHearts(){
+    var b=document.querySelectorAll('.item .fav');
+    for(var i=0;i<b.length;i++){b[i].classList.toggle('is-fav',idxOf(favs,b[i].getAttribute('data-num'))>-1);}
+  }
+  var drawer=document.getElementById('favDrawer'),list=document.getElementById('favList'),
+      empty=document.getElementById('favEmpty'),wa=document.getElementById('favWa');
+  function renderList(){
+    if(!list)return;
+    list.innerHTML='';
+    var any=favs.length>0;
+    if(empty)empty.style.display=any?'none':'';
+    if(wa)wa.style.display=any?'':'none';
+    for(var i=0;i<favs.length;i++){
+      var f=favs[i],el=document.createElement('div');el.className='fav-item';
+      el.innerHTML='<a class="fav-thumb" href="category-'+f.cat+'.html"><img src="'+f.img+'" alt="#'+f.num+'"></a>'
+        +'<a class="fav-meta" href="category-'+f.cat+'.html">#'+f.num+'</a>'
+        +'<button type="button" class="fav-rm" data-num="'+f.num+'" aria-label="Remove">&times;</button>';
+      list.appendChild(el);
+    }
+    if(wa&&any){
+      var lang=document.documentElement.getAttribute('data-lang')||'ka';
+      var pre=lang==='en'?'Hi! I am interested in these patterns: ':lang==='ru'?'Здравствуйте! Меня интересуют эти образцы: ':'გამარჯობა! მაინტერესებს ეს ნიმუშები: ';
+      var nums=favs.map(function(f){return '#'+f.num;}).join(', ');
+      wa.href='https://wa.me/995599922749?text='+encodeURIComponent(pre+nums);
+    }
+  }
+  var items=document.querySelectorAll('.item .fav');
+  for(var i=0;i<items.length;i++){
+    items[i].addEventListener('click',function(e){
+      e.stopPropagation();e.preventDefault();
+      var fig=this.closest('.item'),num=this.getAttribute('data-num'),k=idxOf(favs,num);
+      if(k>-1){favs.splice(k,1);}else{favs.push({num:num,cat:fig.getAttribute('data-cat'),img:fig.getAttribute('data-img')});}
+      write(favs);this.classList.toggle('is-fav',k===-1);updateCount();renderList();
+    });
+  }
+  function setOpen(o){if(!drawer)return;drawer.classList.toggle('open',o);drawer.setAttribute('aria-hidden',o?'false':'true');document.body.style.overflow=o?'hidden':'';}
+  var openBtn=document.getElementById('favOpen'),closeBtn=document.getElementById('favClose');
+  if(openBtn)openBtn.addEventListener('click',function(){renderList();setOpen(true);});
+  if(closeBtn)closeBtn.addEventListener('click',function(){setOpen(false);});
+  if(drawer)drawer.addEventListener('click',function(e){if(e.target===drawer)setOpen(false);});
+  if(list)list.addEventListener('click',function(e){
+    var b=e.target.closest('.fav-rm');if(!b)return;
+    var k=idxOf(favs,b.getAttribute('data-num'));
+    if(k>-1){favs.splice(k,1);write(favs);renderList();updateCount();syncHearts();}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});
+  updateCount();syncHearts();renderList();
+})();
+</script>
+<script>
+(function(){
+  var bar=document.getElementById('filterBar');
+  var grid=document.getElementById('catGrid');
+  if(!bar||!grid)return;
+  var cards=[].slice.call(grid.querySelectorAll('.cat-card'));
+  var filter='all',sort='';
+  function apply(){
+    cards.forEach(function(c){
+      var ok = filter==='all' ? true
+             : filter==='sale' ? c.getAttribute('data-sale')==='1'
+             : c.getAttribute('data-type')===filter;
+      c.style.display=ok?'':'none';
+    });
+    if(sort){
+      var vis=cards.slice().sort(function(a,b){
+        var pa=parseInt(a.getAttribute('data-price')||'0',10),pb=parseInt(b.getAttribute('data-price')||'0',10);
+        return sort==='price-asc'?pa-pb:pb-pa;
+      });
+      vis.forEach(function(c){grid.appendChild(c);});
+    }
+  }
+  bar.addEventListener('click',function(e){
+    var b=e.target.closest('.chip');if(!b)return;
+    if(b.hasAttribute('data-filter')){
+      filter=b.getAttribute('data-filter');
+      bar.querySelectorAll('[data-filter]').forEach(function(x){x.classList.toggle('is-active',x===b);});
+    }else if(b.hasAttribute('data-sort')){
+      var s=b.getAttribute('data-sort');
+      if(sort===s){sort='';b.classList.remove('is-active');}
+      else{sort=s;bar.querySelectorAll('[data-sort]').forEach(function(x){x.classList.toggle('is-active',x===b);});}
+    }
+    apply();
   });
 })();
 </script>

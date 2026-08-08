@@ -272,6 +272,21 @@ def icon(name, size=20):
             f'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
             f'stroke-linejoin="round" aria-hidden="true">{ICON_PATHS[name]}</svg>')
 
+# heart (fill toggled via CSS .is-fav) — used for the favourites / shortlist feature
+HEART_SVG = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+             '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8'
+             'l1.1 1.1L12 21l7.7-7.5 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>')
+
+def price_num(v):
+    """Best-effort numeric price for sorting / totals; None if not numeric."""
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        return int(v)
+    m = re.match(r"(\d+)", str(v).replace("₾", "").strip())
+    return int(m.group(1)) if m else None
+
 # a single gold leaf (used in the line·leaf·line divider that echoes the logo lockup)
 LEAF_SVG = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
             '<path d="M12 2C7.5 6 6 11.5 9 17c.6 1.1 1.7 2.4 3 5 1.3-2.6 2.4-3.9 3-5 3-5.5 1.5-11-3-15z"/>'
@@ -330,16 +345,22 @@ def header_html():
       {i18n("შპალერების მაღაზია","Wallpaper Store","small",ru="Магазин обоев")}
     </span>
   </a>
-  <div class="lang-dd" data-langdd>
-    <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
-      <span class="lang-cur"><span class="ka">ქართული</span><span class="en">English</span><span class="ru">Русский</span></span>
-      {icon('chevD', 16)}
+  <div class="head-actions">
+    <button type="button" class="fav-open" id="favOpen" aria-label="შენახული · Shortlist">
+      <span class="fav-open-ic">{HEART_SVG}</span>
+      <span class="fav-count" data-favcount data-empty="1">0</span>
     </button>
-    <ul class="lang-menu" role="listbox" hidden>
-      <li><button type="button" role="option" class="lang-item" data-lang-set="ka">ქართული</button></li>
-      <li><button type="button" role="option" class="lang-item" data-lang-set="en">English</button></li>
-      <li><button type="button" role="option" class="lang-item" data-lang-set="ru">Русский</button></li>
-    </ul>
+    <div class="lang-dd" data-langdd>
+      <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+        <span class="lang-cur"><span class="ka">ქართული</span><span class="en">English</span><span class="ru">Русский</span></span>
+        {icon('chevD', 16)}
+      </button>
+      <ul class="lang-menu" role="listbox" hidden>
+        <li><button type="button" role="option" class="lang-item" data-lang-set="ka">ქართული</button></li>
+        <li><button type="button" role="option" class="lang-item" data-lang-set="en">English</button></li>
+        <li><button type="button" role="option" class="lang-item" data-lang-set="ru">Русский</button></li>
+      </ul>
+    </div>
   </div>
 </header>'''
 
@@ -353,7 +374,15 @@ def contact_bar():
   <a href="mailto:{esc(b['email'])}" class="cbtn cbtn-mail" aria-label="Email">{icon('mail')}<span>Email</span></a>
 </nav>'''
 
-def calc_section():
+def calc_section(cats=None):
+    price_opts = []
+    for c in (cats or []):
+        pv = price_num(c["new"])
+        if pv:
+            # language-neutral label: category number + price
+            price_opts.append(f'<option value="{pv}">#{c["no"]} · {pv} ₾</option>')
+    price_field = f'''<label class="calc-field"><span>{i18n("რულონის ფასი (არჩევითი)","Roll price (optional)","span",ru="Цена рулона (необязательно)")}</span>
+          <select id="calcPrice"><option value="">—</option>{"".join(price_opts)}</select></label>''' if price_opts else ""
     return f'''<section class="calc-section" aria-label="Wallpaper calculator">
   <div class="container">
     <div class="calc-card">
@@ -373,6 +402,7 @@ def calc_section():
           <input type="number" id="calcH" min="0" step="0.1" inputmode="decimal" placeholder="2.7"></label>
         <label class="calc-field"><span>{i18n("რულონის ზომა","Roll size","span",ru="Размер рулона")}</span>
           <select id="calcRW"><option value="1.06">1.06 m × 10 m</option><option value="0.53">0.53 m × 10 m</option></select></label>
+        {price_field}
       </div>
       <button type="button" id="calcBtn" class="btn btn-gold calc-btn">{icon('ruler')}<span>{i18n("გამოთვლა","Calculate",ru="Рассчитать")}</span></button>
       <div class="calc-result" id="calcResult" hidden></div>
@@ -426,6 +456,17 @@ def footer_html():
 <div class="sticky-contact" aria-label="Quick contact">
   <a href="https://wa.me/{esc(b['whatsapp'])}" class="sc-btn sc-wa" target="_blank" rel="noopener" aria-label="WhatsApp">{icon('chat', 26)}</a>
   <a href="tel:{esc(b['phone_tel'])}" class="sc-btn sc-call" aria-label="დარეკვა · Call">{icon('phone', 26)}</a>
+</div>
+<div class="fav-drawer" id="favDrawer" aria-hidden="true">
+  <aside class="fav-panel" role="dialog" aria-label="შენახული ნიმუშები">
+    <div class="fav-head">
+      <h2>{i18n("შენახული ნიმუშები","Saved patterns","span",ru="Сохранённые образцы")}</h2>
+      <button type="button" class="fav-close" id="favClose" aria-label="დახურვა · Close">{icon('close', 24)}</button>
+    </div>
+    <div class="fav-list" id="favList"></div>
+    <p class="fav-empty" id="favEmpty">{i18n("ჯერ არაფერია შენახული. დააჭირეთ ♡ ნებისმიერ ნიმუშზე.","Nothing saved yet. Tap ♡ on any pattern.","span",ru="Пока ничего не сохранено. Нажмите ♡ на любом образце.")}</p>
+    <a class="btn btn-gold fav-wa" id="favWa" target="_blank" rel="noopener" href="https://wa.me/{esc(b['whatsapp'])}">{icon('chat')}<span>{i18n("გაგზავნა WhatsApp-ით","Send via WhatsApp","span",ru="Отправить в WhatsApp")}</span></a>
+  </aside>
 </div>
 {STATUS_JS}'''
 
@@ -509,10 +550,24 @@ CALC_JS = '''<script>
     var stripsPerRoll=Math.floor(rollLen/H);
     var rolls=Math.ceil(strips/stripsPerRoll);
     var withExtra=rolls+1;
+    var pEl=document.getElementById('calcPrice');
+    var price=pEl?(parseFloat(pEl.value)||0):0;
+    var totalHtml='';
+    if(price>0){
+      var total=rolls*price,totalRec=withExtra*price;
+      totalHtml='<div class="calc-total">'
+        +'<span class="ka">სავარაუდო ღირებულება <b>'+total+' ₾</b></span>'
+        +'<span class="en">Estimated cost <b>'+total+' ₾</b></span>'
+        +'<span class="ru">Примерная стоимость <b>'+total+' ₾</b></span>'
+        +'<em class="calc-total-rec"><span class="ka">'+withExtra+' რულონით (მარაგით) — '+totalRec+' ₾</span>'
+        +'<span class="en">with '+withExtra+' rolls (incl. spare) — '+totalRec+' ₾</span>'
+        +'<span class="ru">с '+withExtra+' '+ruRolls(withExtra)+' (с запасом) — '+totalRec+' ₾</span></em></div>';
+    }
     res.hidden=false;res.className='calc-result';
     res.innerHTML=
       '<div class="calc-big"><span class="calc-num">'+rolls+'</span>'
       +'<span class="ka">&nbsp;რულონი</span><span class="en">&nbsp;rolls</span><span class="ru">&nbsp;'+ruRolls(rolls)+'</span></div>'
+      +totalHtml
       +'<p class="calc-rec"><span class="ka">გირჩევთ აიღოთ '+withExtra+' რულონი — მარაგი ჭრისა და ნახატის დასამთხვევად.</span>'
       +'<span class="en">We recommend buying '+withExtra+' rolls — one spare for cutting and pattern matching.</span>'
       +'<span class="ru">Рекомендуем купить '+withExtra+' '+ruRolls(withExtra)+' — один запасной для подрезки и подгонки рисунка.</span></p>'
@@ -535,20 +590,136 @@ LIGHTBOX_JS = '''<script>
   var big=document.getElementById('lb-img'),cap=document.getElementById('lb-cap'),
       cnt=document.getElementById('lb-count'),idx=0;
   var data=figs.map(function(f){return {src:f.querySelector('img').getAttribute('src'),num:f.getAttribute('data-num')};});
-  function show(i){idx=(i+data.length)%data.length;big.src=data[idx].src;cap.textContent='#'+data[idx].num;cnt.textContent=(idx+1)+' / '+data.length;}
+  var zoomed=false;
+  function setZoom(z){zoomed=z;big.classList.toggle('zoomed',z);if(!z){big.style.transformOrigin='center center';}}
+  function show(i){idx=(i+data.length)%data.length;big.src=data[idx].src;cap.textContent='#'+data[idx].num;cnt.textContent=(idx+1)+' / '+data.length;setZoom(false);}
   function open(i){show(i);ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
-  function close(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+  function close(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';setZoom(false);}
   figs.forEach(function(f,i){
     f.addEventListener('click',function(){open(i);});
-    f.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open(i);}});
+    f.addEventListener('keydown',function(e){
+      if(e.target.closest('.fav'))return;
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();open(i);}
+    });
   });
+  // click image to zoom into the texture; move to pan
+  big.addEventListener('click',function(e){e.stopPropagation();setZoom(!zoomed);});
+  function pan(e){
+    if(!zoomed)return;
+    var t=e.touches?e.touches[0]:e,r=big.getBoundingClientRect();
+    var x=Math.max(0,Math.min(100,((t.clientX-r.left)/r.width)*100));
+    var y=Math.max(0,Math.min(100,((t.clientY-r.top)/r.height)*100));
+    big.style.transformOrigin=x+'% '+y+'%';
+  }
+  big.addEventListener('mousemove',pan);
+  big.addEventListener('touchmove',function(e){pan(e);},{passive:true});
   document.getElementById('lb-next').addEventListener('click',function(e){e.stopPropagation();show(idx+1);});
   document.getElementById('lb-prev').addEventListener('click',function(e){e.stopPropagation();show(idx-1);});
   document.getElementById('lb-close').addEventListener('click',close);
   ov.addEventListener('click',function(e){if(e.target===ov||e.target.classList.contains('lb-stage'))close();});
   document.addEventListener('keydown',function(e){
     if(!ov.classList.contains('open'))return;
-    if(e.key==='Escape')close();else if(e.key==='ArrowRight')show(idx+1);else if(e.key==='ArrowLeft')show(idx-1);
+    if(e.key==='Escape'){if(zoomed){setZoom(false);}else{close();}}
+    else if(e.key==='ArrowRight')show(idx+1);else if(e.key==='ArrowLeft')show(idx-1);
+  });
+})();
+</script>'''
+
+# favourites / shortlist — heart toggle, count badge, slide-in drawer, WhatsApp handoff.
+# __WA__ is replaced with the WhatsApp number at build time.
+FAV_JS = '''<script>
+(function(){
+  var KEY='eurodecorFavs';
+  function read(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return [];}}
+  function write(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}}
+  function idxOf(a,num){for(var i=0;i<a.length;i++){if(a[i].num===num)return i;}return -1;}
+  var favs=read();
+  var counts=document.querySelectorAll('[data-favcount]');
+  function updateCount(){for(var i=0;i<counts.length;i++){counts[i].textContent=favs.length;counts[i].setAttribute('data-empty',favs.length?'0':'1');}}
+  function syncHearts(){
+    var b=document.querySelectorAll('.item .fav');
+    for(var i=0;i<b.length;i++){b[i].classList.toggle('is-fav',idxOf(favs,b[i].getAttribute('data-num'))>-1);}
+  }
+  var drawer=document.getElementById('favDrawer'),list=document.getElementById('favList'),
+      empty=document.getElementById('favEmpty'),wa=document.getElementById('favWa');
+  function renderList(){
+    if(!list)return;
+    list.innerHTML='';
+    var any=favs.length>0;
+    if(empty)empty.style.display=any?'none':'';
+    if(wa)wa.style.display=any?'':'none';
+    for(var i=0;i<favs.length;i++){
+      var f=favs[i],el=document.createElement('div');el.className='fav-item';
+      el.innerHTML='<a class="fav-thumb" href="category-'+f.cat+'.html"><img src="'+f.img+'" alt="#'+f.num+'"></a>'
+        +'<a class="fav-meta" href="category-'+f.cat+'.html">#'+f.num+'</a>'
+        +'<button type="button" class="fav-rm" data-num="'+f.num+'" aria-label="Remove">&times;</button>';
+      list.appendChild(el);
+    }
+    if(wa&&any){
+      var lang=document.documentElement.getAttribute('data-lang')||'ka';
+      var pre=lang==='en'?'Hi! I am interested in these patterns: ':lang==='ru'?'Здравствуйте! Меня интересуют эти образцы: ':'გამარჯობა! მაინტერესებს ეს ნიმუშები: ';
+      var nums=favs.map(function(f){return '#'+f.num;}).join(', ');
+      wa.href='https://wa.me/__WA__?text='+encodeURIComponent(pre+nums);
+    }
+  }
+  var items=document.querySelectorAll('.item .fav');
+  for(var i=0;i<items.length;i++){
+    items[i].addEventListener('click',function(e){
+      e.stopPropagation();e.preventDefault();
+      var fig=this.closest('.item'),num=this.getAttribute('data-num'),k=idxOf(favs,num);
+      if(k>-1){favs.splice(k,1);}else{favs.push({num:num,cat:fig.getAttribute('data-cat'),img:fig.getAttribute('data-img')});}
+      write(favs);this.classList.toggle('is-fav',k===-1);updateCount();renderList();
+    });
+  }
+  function setOpen(o){if(!drawer)return;drawer.classList.toggle('open',o);drawer.setAttribute('aria-hidden',o?'false':'true');document.body.style.overflow=o?'hidden':'';}
+  var openBtn=document.getElementById('favOpen'),closeBtn=document.getElementById('favClose');
+  if(openBtn)openBtn.addEventListener('click',function(){renderList();setOpen(true);});
+  if(closeBtn)closeBtn.addEventListener('click',function(){setOpen(false);});
+  if(drawer)drawer.addEventListener('click',function(e){if(e.target===drawer)setOpen(false);});
+  if(list)list.addEventListener('click',function(e){
+    var b=e.target.closest('.fav-rm');if(!b)return;
+    var k=idxOf(favs,b.getAttribute('data-num'));
+    if(k>-1){favs.splice(k,1);write(favs);renderList();updateCount();syncHearts();}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});
+  updateCount();syncHearts();renderList();
+})();
+</script>'''
+
+# category filter + price sort on the home grid
+FILTER_JS = '''<script>
+(function(){
+  var bar=document.getElementById('filterBar');
+  var grid=document.getElementById('catGrid');
+  if(!bar||!grid)return;
+  var cards=[].slice.call(grid.querySelectorAll('.cat-card'));
+  var filter='all',sort='';
+  function apply(){
+    cards.forEach(function(c){
+      var ok = filter==='all' ? true
+             : filter==='sale' ? c.getAttribute('data-sale')==='1'
+             : c.getAttribute('data-type')===filter;
+      c.style.display=ok?'':'none';
+    });
+    if(sort){
+      var vis=cards.slice().sort(function(a,b){
+        var pa=parseInt(a.getAttribute('data-price')||'0',10),pb=parseInt(b.getAttribute('data-price')||'0',10);
+        return sort==='price-asc'?pa-pb:pb-pa;
+      });
+      vis.forEach(function(c){grid.appendChild(c);});
+    }
+  }
+  bar.addEventListener('click',function(e){
+    var b=e.target.closest('.chip');if(!b)return;
+    if(b.hasAttribute('data-filter')){
+      filter=b.getAttribute('data-filter');
+      bar.querySelectorAll('[data-filter]').forEach(function(x){x.classList.toggle('is-active',x===b);});
+    }else if(b.hasAttribute('data-sort')){
+      var s=b.getAttribute('data-sort');
+      if(sort===s){sort='';b.classList.remove('is-active');}
+      else{sort=s;bar.querySelectorAll('[data-sort]').forEach(function(x){x.classList.toggle('is-active',x===b);});}
+    }
+    apply();
   });
 })();
 </script>'''
@@ -559,7 +730,8 @@ def render_home(cats):
     for c in cats:
         first_img = c.get("thumb", "assets/img/logo.webp")
         badge = f'<span class="badge">{i18n("ფასდაკლება","Sale",ru="Скидка")}</span>' if c["old"] else ""
-        cards.append(f'''<a class="cat-card" href="category-{c['no']}.html">
+        pv = price_num(c["new"]) or 0
+        cards.append(f'''<a class="cat-card" href="category-{c['no']}.html" data-type="{c['key']}" data-price="{pv}" data-sale="{1 if c['old'] else 0}">
       <div class="cat-thumb">{badge}
         <img loading="lazy" decoding="async" width="520" height="693" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}">
       </div>
@@ -570,6 +742,28 @@ def render_home(cats):
       </div>
     </a>''')
     grid = "\n".join(cards)
+
+    # filter/sort bar — only the dimensions the catalog actually carries: type, sale, price
+    type_labels = {
+        "wallpaper": ("შპალერი", "Wallpaper", "Обои"),
+        "paintable": ("შესაღები", "Paintable", "Под покраску"),
+        "glue":      ("წებო", "Glue", "Клей"),
+    }
+    present = [k for k in ("wallpaper", "paintable", "glue") if any(c["key"] == k for c in cats)]
+    chips = [f'<button type="button" class="chip is-active" data-filter="all">{i18n("ყველა","All",ru="Все")}</button>']
+    for k in present:
+        ka, en, ru = type_labels[k]
+        chips.append(f'<button type="button" class="chip" data-filter="{k}">{i18n(ka, en, ru=ru)}</button>')
+    if any(c["old"] for c in cats):
+        chips.append(f'<button type="button" class="chip chip-sale" data-filter="sale">{i18n("ფასდაკლება","On sale",ru="Скидка")}</button>')
+    filter_bar = f'''<div class="filter-bar" id="filterBar">
+    <div class="chip-row">{"".join(chips)}</div>
+    <div class="chip-row sort-row">
+      <span class="sort-label">{i18n("დახარისხება","Sort",ru="Сортировка")}</span>
+      <button type="button" class="chip" data-sort="price-asc">{i18n("იაფი ჯერ","Price ↑",ru="Сначала дешёвые")}</button>
+      <button type="button" class="chip" data-sort="price-desc">{i18n("ძვირი ჯერ","Price ↓",ru="Сначала дорогие")}</button>
+    </div>
+  </div>'''
     hero = f'''<section class="hero">
     {sprig_svg()}
     <div class="hero-grid">
@@ -593,15 +787,18 @@ def render_home(cats):
 <main class="container">
   <h2 class="section-title" id="categories">{i18n("კატეგორიები","Categories","span",ru="Категории")}</h2>
   {leaf_div(center=True)}
-  <div class="cat-grid">
+  {filter_bar}
+  <div class="cat-grid" id="catGrid">
     {grid}
   </div>
 </main>
-{calc_section()}
+{calc_section(cats)}
 {map_section()}
 {footer_html()}
 {LANG_JS}
-{CALC_JS}'''
+{CALC_JS}
+{FAV_JS.replace("__WA__", BIZ['whatsapp'])}
+{FILTER_JS}'''
     title_ka = "ევროდეკორი — შპალერების მაღაზია თბილისში"
     title_en = "Eurodecor — Wallpaper Store in Tbilisi"
     desc = "შპალერი, ვინილის შპალერი, ფლიზელინი, შესაღები შპალერი და შპალერის წებო — საუკეთესო ფასებში, პირდაპირ ქარხნიდან. თბილისი, აკაკი წერეთლის 130."
@@ -616,9 +813,10 @@ def render_home(cats):
 def render_category(c):
     items = []
     for it in c["items"]:
-        items.append(f'''<figure class="item" data-num="{it['num']}" tabindex="0" role="button" aria-label="#{it['num']}">
+        items.append(f'''<figure class="item" data-num="{it['num']}" data-cat="{c['no']}" data-img="{it['img']}" tabindex="0" role="button" aria-label="#{it['num']}">
       <div class="item-img">
         <img loading="lazy" src="{it['img']}" alt="{esc(c['type_en'])} #{it['num']}">
+        <button type="button" class="fav" data-num="{it['num']}" aria-label="შენახვა · Save">{HEART_SVG}</button>
         <span class="zoom">{icon('zoom')}</span>
       </div>
       <figcaption>#{it['num']}</figcaption>
@@ -665,7 +863,8 @@ def render_category(c):
 {footer_html()}
 {lightbox}
 {LANG_JS}
-{LIGHTBOX_JS}'''
+{LIGHTBOX_JS}
+{FAV_JS.replace("__WA__", BIZ['whatsapp'])}'''
     title_ka = f"{c['type_ka']} #{c['no']} — ევროდეკორი"
     title_en = f"{c['type_en']} #{c['no']} — Eurodecor"
     desc = f"{c['type_ka']} #{c['no']}, {c['size']} — ევროდეკორი, თბილისი. საუკეთესო ფასი."
@@ -937,6 +1136,64 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
 .lb-bar{{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:18px;
   color:#fff;font-size:.95rem;letter-spacing:.05em}}
 #lb-cap{{font-weight:700;color:var(--taupe)}}
+.lb-stage img{{cursor:zoom-in;transition:transform .25s ease}}
+.lb-stage img.zoomed{{transform:scale(2.6);cursor:zoom-out}}
+
+/* header actions + shortlist button */
+.head-actions{{display:flex;align-items:center;gap:10px}}
+.fav-open{{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;
+  background:#fff;border:1px solid var(--line);border-radius:10px;color:var(--plum);cursor:pointer;transition:.15s}}
+.fav-open:hover{{border-color:var(--plum)}}
+.fav-open-ic{{display:flex}}
+.fav-open-ic svg{{width:20px;height:20px}}
+.fav-count{{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;
+  background:var(--sale);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}}
+.fav-count[data-empty="1"]{{display:none}}
+
+/* heart button on each pattern */
+.fav{{position:absolute;top:10px;right:10px;z-index:4;width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  border:none;border-radius:50%;background:rgba(255,255,255,.9);color:var(--plum);cursor:pointer;
+  box-shadow:0 3px 10px rgba(70,28,93,.18);transition:.15s}}
+.fav svg{{width:20px;height:20px;transition:.15s}}
+.fav:hover{{background:#fff;transform:scale(1.08)}}
+.fav.is-fav{{color:var(--sale)}}
+.fav.is-fav svg{{fill:var(--sale)}}
+
+/* shortlist drawer */
+.fav-drawer{{position:fixed;inset:0;z-index:120;display:none;background:rgba(22,9,31,.5)}}
+.fav-drawer.open{{display:block}}
+.fav-panel{{position:absolute;top:0;right:0;height:100%;width:min(380px,90vw);background:var(--cream);
+  box-shadow:-16px 0 44px rgba(0,0,0,.3);display:flex;flex-direction:column;padding:20px}}
+.fav-head{{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}}
+.fav-head h2{{font-family:var(--serif);color:var(--plum);font-size:1.3rem;margin:0}}
+.fav-close{{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:none;border-radius:50%;
+  background:#fff;color:var(--plum);cursor:pointer;box-shadow:0 2px 8px rgba(70,28,93,.12)}}
+.fav-list{{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:10px}}
+.fav-item{{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}}
+.fav-thumb{{flex:none;width:56px;height:56px;border-radius:8px;overflow:hidden;background:var(--royal)}}
+.fav-thumb img{{width:100%;height:100%;object-fit:cover}}
+.fav-meta{{flex:1 1 auto;font-weight:700;color:var(--plum);letter-spacing:.04em}}
+.fav-rm{{flex:none;width:30px;height:30px;border:none;border-radius:50%;background:var(--cream-2);color:var(--muted);
+  font-size:1.2rem;line-height:1;cursor:pointer;transition:.15s}}
+.fav-rm:hover{{background:var(--sale);color:#fff}}
+.fav-empty{{color:var(--muted);text-align:center;margin:32px 0}}
+.fav-wa{{justify-content:center;margin-top:14px}}
+
+/* filter + sort bar */
+.filter-bar{{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 4px}}
+.chip-row{{display:flex;flex-wrap:wrap;align-items:center;gap:8px}}
+.chip{{background:#fff;border:1px solid var(--line);color:var(--plum);border-radius:999px;padding:8px 16px;
+  font-family:inherit;font-weight:600;font-size:.86rem;cursor:pointer;transition:.15s}}
+.chip:hover{{border-color:var(--plum)}}
+.chip.is-active{{background:var(--plum);color:#fff;border-color:var(--plum)}}
+.chip-sale.is-active{{background:var(--sale);border-color:var(--sale)}}
+.sort-label{{color:var(--muted);font-size:.82rem;font-weight:600;letter-spacing:.04em}}
+
+/* calculator total */
+.calc-total{{margin-top:12px;padding-top:12px;border-top:1px dashed var(--gold);
+  font-size:1.05rem;color:var(--ink);display:flex;flex-direction:column;gap:2px}}
+.calc-total b{{font-family:var(--serif);color:var(--plum);font-size:1.35rem}}
+.calc-total-rec{{color:var(--muted);font-size:.82rem;font-style:normal}}
 
 @media(max-width:820px){{
   .hero-grid{{grid-template-columns:1fr;min-height:0}}
