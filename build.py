@@ -45,54 +45,6 @@ BIZ = {
 # custom domain written to docs/CNAME on every build
 CUSTOM_DOMAIN = "eurodecor.com.ge"
 
-# ---------------------------------------------------------------- editable content blocks
-# Sitewide promo bar. Set "on": False to hide. Text is honest (many items are on sale).
-PROMO = {
-    "on": True,
-    "ka": "🔥 სეზონური ფასდაკლებები მიმდინარეობს — იხილეთ კატალოგი",
-    "en": "🔥 Seasonal sale on now — see the catalog",
-    "ru": "🔥 Идёт сезонная распродажа — смотрите каталог",
-}
-
-# Real customer reviews go here as they come in. Leave empty → a "leave a review" CTA shows
-# instead. Do NOT invent reviews. Each: dict(name, text_ka, text_en, text_ru, stars).
-REVIEWS = []
-
-# Delivery / installation — deliberately generic so nothing is over-promised.
-# Replace with exact area + pricing once confirmed with the shop.
-DELIVERY = {
-    "title_ka": "მიწოდება და დაკვრა", "title_en": "Delivery & installation", "title_ru": "Доставка и поклейка",
-    "rows": [
-        ("🚚", "მიწოდება თბილისსა და საქართველოში", "Delivery in Tbilisi & across Georgia", "Доставка по Тбилиси и Грузии"),
-        ("🧑‍🔧", "დახმარება ოსტატის შერჩევაში — გვკითხეთ", "Help arranging a professional installer — just ask", "Поможем с мастером-поклейщиком — спросите"),
-        ("💬", "დეტალებისთვის დაგვირეკეთ ან მოგვწერეთ WhatsApp-ში", "Call or WhatsApp us for details & a quote", "Звоните или пишите в WhatsApp за деталями"),
-    ],
-}
-
-# FAQ — accurate answers built from the known product facts. FAQPage schema is emitted too.
-FAQ = [
-    ("რამდენი შპალერი დამჭირდება?", "How much wallpaper do I need?", "Сколько обоев мне нужно?",
-     "გამოიყენეთ ჩვენი კალკულატორი — ერთი რულონი ≈ 10 მ სიგრძე. გირჩევთ +1 რულონს მარაგში ჭრისა და ნახატის დასამთხვევად.",
-     "Use our calculator — one roll is ≈10 m long. We recommend one spare roll for cutting and pattern matching.",
-     "Используйте наш калькулятор — один рулон ≈10 м. Рекомендуем +1 рулон про запас для подрезки и подгонки рисунка."),
-    ("შპალერი ირეცხება?", "Are the wallpapers washable?", "Обои моющиеся?",
-     "დიახ — ვინილი ფლიზელინის საფუძველზე, ირეცხება და ტენგამძლეა.",
-     "Yes — vinyl on a non-woven (flizeline) base, washable and moisture-resistant.",
-     "Да — винил на флизелиновой основе, моющиеся и влагостойкие."),
-    ("რა ზომისაა რულონი?", "What size is a roll?", "Какой размер рулона?",
-     "სტანდარტული 1.06 მ × 10 მ; ზოგი ტიპი 0.53 მ × 10 მ.",
-     "Standard 1.06 m × 10 m; some types are 0.53 m × 10 m.",
-     "Стандарт 1.06 м × 10 м; некоторые типы 0.53 м × 10 м."),
-    ("აწვდით მიწოდებას?", "Do you deliver?", "Вы доставляете?",
-     "დიახ — თბილისსა და საქართველოში. დეტალებისთვის მოგვწერეთ WhatsApp-ში.",
-     "Yes — in Tbilisi and across Georgia. Message us on WhatsApp for details.",
-     "Да — по Тбилиси и Грузии. Напишите нам в WhatsApp за деталями."),
-    ("როგორ შევუკვეთო?", "How do I order?", "Как заказать?",
-     "მოგვწერეთ ნიმუშის ნომერი (მაგ. #0101) WhatsApp-ში ან Messenger-ში, ან ეწვიეთ მაღაზიას.",
-     "Message us the pattern number (e.g. #0101) on WhatsApp or Messenger, or visit the shop.",
-     "Напишите нам номер образца (напр. #0101) в WhatsApp или Messenger, либо зайдите в магазин."),
-]
-
 C_PRIMARY = "#461c5d"
 C_SECOND  = "#d1c2b9"
 
@@ -146,16 +98,6 @@ IMG_EXT = (".png", ".jpg", ".jpeg", ".webp")
 # ---------------------------------------------------------------- helpers
 def esc(s):
     return html.escape(str(s), quote=True)
-
-def jstr(s):
-    """JSON-encode a string (for inline ld+json)."""
-    import json
-    return json.dumps(str(s), ensure_ascii=False)
-
-def quote_plus_ka(s):
-    """URL-encode text (incl. Georgian) for a wa.me ?text= query."""
-    from urllib.parse import quote
-    return quote(str(s), safe="")
 
 def clean_size(s):
     return str(s).replace("m^2", "m²").replace("^2", "²").strip() if s else ""
@@ -303,31 +245,6 @@ def build_items(cat):
             items.append({"num": num, "img": f"assets/img/c{cat['no']}/{dst_name}"})
     return items
 
-def build_gallery():
-    """Optional 'installed / inspiration' photos from D:\\Eurodecor\\gallery. Empty if absent."""
-    folder = os.path.join(ROOT, "gallery")
-    if not os.path.isdir(folder):
-        return []
-    files = sorted(f for f in os.listdir(folder) if f.lower().endswith(IMG_EXT))
-    out_dir = os.path.join(IMG_OUT, "gallery")
-    os.makedirs(out_dir, exist_ok=True)
-    imgs = []
-    for i, f in enumerate(files, 1):
-        dst = f"g{i:02d}.webp"
-        optimize(os.path.join(folder, f), os.path.join(out_dir, dst), maxw=900)
-        imgs.append(f"assets/img/gallery/{dst}")
-    return imgs
-
-def gallery_section(imgs):
-    if not imgs:
-        return ""
-    tiles = "".join(f'<figure class="gl-tile"><img loading="lazy" src="{s}" alt="Eurodecor"></figure>' for s in imgs)
-    return f'''<section class="gl-section" aria-label="Gallery"><div class="container">
-    <h2 class="gl-title">{i18n("ინსპირაცია","Inspiration","span",ru="Вдохновение")}</h2>
-    {leaf_div(center=True)}
-    <div class="gl-grid">{tiles}</div>
-  </div></section>'''
-
 # ---------------------------------------------------------------- HTML fragments
 def i18n(ka, en, tag="span", ru=None):
     if ru is None:
@@ -348,14 +265,7 @@ ICON_PATHS = {
     "close": '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
     "zoom": '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>',
     "ruler": '<path d="M2.5 15.5 15.5 2.5a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L8.5 21.5a2 2 0 0 1-2.8 0l-3.2-3.2a2 2 0 0 1 0-2.8z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/>',
-    "search": '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/>',
-    "share": '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/>',
-    "bell": '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
-    "plus": '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
 }
-
-STAR_SVG = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
-            '<path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.9l-5.8 3.05 1.1-6.45-4.7-4.6 6.5-.95z"/></svg>')
 
 def icon(name, size=20):
     return (f'<svg class="ic" width="{size}" height="{size}" viewBox="0 0 24 24" '
@@ -473,8 +383,6 @@ def calc_section(cats=None):
             price_opts.append(f'<option value="{pv}">#{c["no"]} · {pv} ₾</option>')
     price_field = f'''<label class="calc-field"><span>{i18n("რულონის ფასი (არჩევითი)","Roll price (optional)","span",ru="Цена рулона (необязательно)")}</span>
           <select id="calcPrice"><option value="">—</option>{"".join(price_opts)}</select></label>''' if price_opts else ""
-    glue = next((c for c in (cats or []) if c["key"] == "glue"), None)
-    glue_data = f'<span id="calcGlueData" hidden data-no="{glue["no"]}" data-price="{price_num(glue["new"]) or 0}"></span>' if glue else ""
     return f'''<section class="calc-section" aria-label="Wallpaper calculator">
   <div class="container">
     <div class="calc-card">
@@ -497,7 +405,6 @@ def calc_section(cats=None):
         {price_field}
       </div>
       <button type="button" id="calcBtn" class="btn btn-gold calc-btn">{icon('ruler')}<span>{i18n("გამოთვლა","Calculate",ru="Рассчитать")}</span></button>
-      {glue_data}
       <div class="calc-result" id="calcResult" hidden></div>
     </div>
   </div>
@@ -522,103 +429,6 @@ def map_section():
     </div>
   </div>
 </section>'''
-
-def promo_bar():
-    if not PROMO.get("on"):
-        return ""
-    return f'''<div class="promo-bar" id="promoBar">
-  <a href="index.html#categories" class="promo-link">{i18n(PROMO["ka"], PROMO["en"], "span", ru=PROMO["ru"])}</a>
-  <button type="button" class="promo-x" id="promoX" aria-label="დახურვა · Close">{icon('close', 16)}</button>
-</div>'''
-
-def reviews_section():
-    head = f'''<h2 class="rv-title">{i18n("რას ამბობენ მომხმარებლები","What customers say","span",ru="Отзывы клиентов")}</h2>'''
-    review_btn = f'''<a class="btn btn-gold rv-cta" href="{esc(BIZ['maps'])}" target="_blank" rel="noopener">{STAR_SVG}<span>{i18n("დაგვიტოვეთ შეფასება Google-ზე","Rate us on Google","span",ru="Оцените нас в Google")}</span></a>'''
-    if REVIEWS:
-        cards = []
-        for r in REVIEWS:
-            stars = "".join(STAR_SVG for _ in range(int(r.get("stars", 5))))
-            cards.append(f'''<figure class="rv-card">
-        <div class="rv-stars">{stars}</div>
-        <blockquote>{i18n(esc(r["text_ka"]), esc(r["text_en"]),"span",ru=esc(r.get("text_ru", r["text_en"])))}</blockquote>
-        <figcaption>{esc(r["name"])}</figcaption>
-      </figure>''')
-        inner = f'<div class="rv-grid">{"".join(cards)}</div>{review_btn}'
-    else:
-        inner = f'''<p class="rv-empty">{i18n("იყავით პირველი, ვინც შეგვაფასებს — თქვენი აზრი გვეხმარება.","Be the first to review us — your feedback helps.","span",ru="Станьте первым, кто оставит отзыв — ваше мнение помогает.")}</p>{review_btn}'''
-    return f'''<section class="rv-section" aria-label="Reviews"><div class="container">{head}{leaf_div(center=True)}{inner}</div></section>'''
-
-def delivery_section():
-    rows = "".join(
-        f'<div class="dl-row"><span class="dl-ic">{emo}</span>{i18n(ka, en,"span",ru=ru)}</div>'
-        for emo, ka, en, ru in DELIVERY["rows"]
-    )
-    return f'''<section class="dl-section" aria-label="Delivery"><div class="container">
-    <h2 class="dl-title">{i18n(DELIVERY["title_ka"], DELIVERY["title_en"],"span",ru=DELIVERY["title_ru"])}</h2>
-    {leaf_div(center=True)}
-    <div class="dl-rows">{rows}</div>
-  </div></section>'''
-
-def faq_section():
-    items = []
-    for ka_q, en_q, ru_q, ka_a, en_a, ru_a in FAQ:
-        items.append(f'''<div class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false">
-        <span>{i18n(ka_q, en_q,"span",ru=ru_q)}</span>{icon('plus', 20)}
-      </button>
-      <div class="faq-a"><p>{i18n(ka_a, en_a,"span",ru=ru_a)}</p></div>
-    </div>''')
-    return f'''<section class="faq-section" aria-label="FAQ"><div class="container faq-wrap">
-    <h2 class="faq-title">{i18n("ხშირად დასმული კითხვები","Frequently asked questions","span",ru="Частые вопросы")}</h2>
-    {leaf_div(center=True)}
-    <div class="faq-list">{"".join(items)}</div>
-  </div></section>'''
-
-def faq_schema():
-    def q(ka_q, en_q, ka_a, en_a):
-        return ('{"@type":"Question","name":%s,"acceptedAnswer":{"@type":"Answer","text":%s}}'
-                % (jstr(en_q + " / " + ka_q), jstr(en_a + " / " + ka_a)))
-    ent = ",".join(q(f[0], f[1], f[3], f[4]) for f in FAQ)
-    return '{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[%s]}' % ent
-
-def newsletter_section():
-    return f'''<section class="nl-section" aria-label="Newsletter"><div class="container nl-card">
-    <span class="nl-ic">{icon('bell', 24)}</span>
-    <div class="nl-copy">
-      <h2 class="nl-title">{i18n("გაიგეთ ახალი კოლექციები და ფასდაკლებები","Hear about new arrivals & sales","span",ru="Узнавайте о новинках и скидках")}</h2>
-      <p class="nl-sub">{i18n("დატოვეთ ელფოსტა — მოგწერთ ახალ ნიმუშებსა და აქციებზე.","Leave your email — we'll message you about new patterns and offers.","span",ru="Оставьте e-mail — сообщим о новинках и акциях.")}</p>
-    </div>
-    <form class="nl-form" id="nlForm">
-      <input type="email" id="nlEmail" required placeholder="you@email.com" aria-label="Email">
-      <button type="submit" class="btn btn-gold">{i18n("გამოწერა","Subscribe","span",ru="Подписаться")}</button>
-    </form>
-    <p class="nl-ok" id="nlOk" hidden>{i18n("გმადლობთ! მალე დაგიკავშირდებით.","Thanks! We'll be in touch.","span",ru="Спасибо! Мы свяжемся с вами.")}</p>
-  </div></section>'''
-
-def visualizer_section(swatches):
-    if not swatches:
-        return ""
-    chips = "".join(
-        f'<button type="button" class="vz-swatch{" is-active" if i==0 else ""}" '
-        f'style="background-image:url({s["img"]})" data-img="{s["img"]}" '
-        f'data-num="{s["num"]}" aria-label="#{s["num"]}"></button>'
-        for i, s in enumerate(swatches)
-    )
-    first = swatches[0]["img"]
-    return f'''<section class="vz-section" aria-label="Room preview"><div class="container">
-    <h2 class="vz-title">{i18n("მოირგეთ კედელზე","See it on your wall","span",ru="Примерьте на стену")}</h2>
-    <p class="vz-sub">{i18n("აირჩიეთ ნიმუში და ნახეთ ოთახში","Pick a pattern to preview it in a room","span",ru="Выберите образец и посмотрите в комнате")}</p>
-    {leaf_div(center=True)}
-    <div class="vz-stage">
-      <div class="vz-wall" id="vzWall" style="background-image:url({first})"></div>
-      <div class="vz-floor"></div>
-      <div class="vz-lamp"></div>
-      <div class="vz-sofa"></div>
-      <div class="vz-frame"></div>
-      <span class="vz-tag" id="vzTag">#{swatches[0]["num"]}</span>
-    </div>
-    <div class="vz-swatches">{chips}</div>
-  </div></section>'''
 
 def footer_html():
     b = BIZ
@@ -676,8 +486,6 @@ LANG_JS = '''<script>
     for(var i=0;i<items.length;i++){
       items[i].setAttribute('aria-selected',items[i].getAttribute('data-lang-set')===l?'true':'false');
     }
-    var ph=document.querySelectorAll('[data-ph-'+l+']');
-    for(var j=0;j<ph.length;j++){ph[j].setAttribute('placeholder',ph[j].getAttribute('data-ph-'+l));}
   }
   function setOpen(o){
     if(!menu||!btn)return;
@@ -766,13 +574,6 @@ CALC_JS = '''<script>
       +'<p class="calc-hint"><span class="ka">პერიმეტრი ≈ '+perimeter.toFixed(1)+' მ · '+strips+' ზოლი · '+stripsPerRoll+' ზოლი / რულონი</span>'
       +'<span class="en">Perimeter ≈ '+perimeter.toFixed(1)+' m · '+strips+' strips · '+stripsPerRoll+' strips / roll</span>'
       +'<span class="ru">Периметр ≈ '+perimeter.toFixed(1)+' м · '+strips+' полос · '+stripsPerRoll+' полос / рулон</span></p>';
-    var g=document.getElementById('calcGlueData');
-    if(g){var gno=g.getAttribute('data-no');
-      res.innerHTML+='<a class="calc-glue" href="category-'+gno+'.html">'
-        +'<span class="ka">💧 არ დაგავიწყდეთ შპალერის წებო (#'+gno+')</span>'
-        +'<span class="en">💧 Don\\'t forget wallpaper glue (#'+gno+')</span>'
-        +'<span class="ru">💧 Не забудьте клей для обоев (#'+gno+')</span></a>';
-    }
   }
   btn.addEventListener('click',calc);
   ['calcL','calcW','calcH'].forEach(function(id){
@@ -791,9 +592,7 @@ LIGHTBOX_JS = '''<script>
   var data=figs.map(function(f){return {src:f.querySelector('img').getAttribute('src'),num:f.getAttribute('data-num')};});
   var zoomed=false;
   function setZoom(z){zoomed=z;big.classList.toggle('zoomed',z);if(!z){big.style.transformOrigin='center center';}}
-  var pageLink=document.getElementById('lb-page');
-  function show(i){idx=(i+data.length)%data.length;big.src=data[idx].src;cap.textContent='#'+data[idx].num;cnt.textContent=(idx+1)+' / '+data.length;
-    if(pageLink)pageLink.href='pattern-'+data[idx].num+'.html';setZoom(false);}
+  function show(i){idx=(i+data.length)%data.length;big.src=data[idx].src;cap.textContent='#'+data[idx].num;cnt.textContent=(idx+1)+' / '+data.length;setZoom(false);}
   function open(i){show(i);ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
   function close(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';setZoom(false);}
   figs.forEach(function(f,i){
@@ -814,14 +613,6 @@ LIGHTBOX_JS = '''<script>
   }
   big.addEventListener('mousemove',pan);
   big.addEventListener('touchmove',function(e){pan(e);},{passive:true});
-  var shareBtn=document.getElementById('lb-share');
-  if(shareBtn)shareBtn.addEventListener('click',function(e){
-    e.stopPropagation();
-    var url=new URL('pattern-'+data[idx].num+'.html',location.href).href;
-    var t='Eurodecor #'+data[idx].num;
-    if(navigator.share){navigator.share({title:t,url:url}).catch(function(){});}
-    else if(navigator.clipboard){navigator.clipboard.writeText(url);shareBtn.classList.add('copied');setTimeout(function(){shareBtn.classList.remove('copied');},1200);}
-  });
   document.getElementById('lb-next').addEventListener('click',function(e){e.stopPropagation();show(idx+1);});
   document.getElementById('lb-prev').addEventListener('click',function(e){e.stopPropagation();show(idx-1);});
   document.getElementById('lb-close').addEventListener('click',close);
@@ -930,89 +721,17 @@ FILTER_JS = '''<script>
     }
     apply();
   });
-  // search box
-  var box=document.getElementById('catSearch');
-  if(box){
-    box.addEventListener('input',function(){
-      var q=this.value.trim().toLowerCase();
-      cards.forEach(function(c){
-        var hay=(c.getAttribute('data-search')||'');
-        var typeOk = filter==='all' ? true : filter==='sale' ? c.getAttribute('data-sale')==='1' : c.getAttribute('data-type')===filter;
-        c.style.display=(typeOk && (!q || hay.indexOf(q)>-1))?'':'none';
-      });
-    });
-  }
-})();
-</script>'''
-
-# promo bar dismiss (remembers per browser)
-PROMO_JS = '''<script>
-(function(){
-  var bar=document.getElementById('promoBar');if(!bar)return;
-  if(localStorage.getItem('promoHidden')==='1'){bar.style.display='none';return;}
-  var x=document.getElementById('promoX');
-  if(x)x.addEventListener('click',function(){bar.style.display='none';localStorage.setItem('promoHidden','1');});
-})();
-</script>'''
-
-# FAQ accordion
-FAQ_JS = '''<script>
-(function(){
-  var qs=document.querySelectorAll('.faq-q');
-  for(var i=0;i<qs.length;i++){
-    qs[i].addEventListener('click',function(){
-      var open=this.getAttribute('aria-expanded')==='true';
-      this.setAttribute('aria-expanded',open?'false':'true');
-      var a=this.nextElementSibling;
-      a.style.maxHeight=open?null:a.scrollHeight+'px';
-      this.parentNode.classList.toggle('is-open',!open);
-    });
-  }
-})();
-</script>'''
-
-# newsletter — no backend: composes an email to the shop with the subscriber's address
-NL_JS = '''<script>
-(function(){
-  var f=document.getElementById('nlForm');if(!f)return;
-  f.addEventListener('submit',function(e){
-    e.preventDefault();
-    var email=document.getElementById('nlEmail').value.trim();
-    if(!email)return;
-    var sub=encodeURIComponent('New arrivals sign-up'),body=encodeURIComponent('Please add me to new arrivals & sales: '+email);
-    window.location.href='mailto:__MAIL__?subject='+sub+'&body='+body;
-    f.style.display='none';
-    var ok=document.getElementById('nlOk');if(ok)ok.hidden=false;
-  });
-})();
-</script>'''
-
-# room visualizer — swap the wall pattern
-VIS_JS = '''<script>
-(function(){
-  var wall=document.getElementById('vzWall'),tag=document.getElementById('vzTag');
-  var sws=document.querySelectorAll('.vz-swatch');
-  if(!wall||!sws.length)return;
-  for(var i=0;i<sws.length;i++){
-    sws[i].addEventListener('click',function(){
-      wall.style.backgroundImage='url('+this.getAttribute('data-img')+')';
-      if(tag)tag.textContent='#'+this.getAttribute('data-num');
-      for(var j=0;j<sws.length;j++)sws[j].classList.remove('is-active');
-      this.classList.add('is-active');
-    });
-  }
 })();
 </script>'''
 
 # ---------------------------------------------------------------- page: home
-def render_home(cats, gallery_imgs=None, swatches=None):
+def render_home(cats):
     cards = []
     for c in cats:
         first_img = c.get("thumb", "assets/img/logo.webp")
         badge = f'<span class="badge">{i18n("ფასდაკლება","Sale",ru="Скидка")}</span>' if c["old"] else ""
         pv = price_num(c["new"]) or 0
-        search = esc(f"{c['no']} {c['type_en']} {c['type_ka']} {c['type_ru']}".lower())
-        cards.append(f'''<a class="cat-card" href="category-{c['no']}.html" data-type="{c['key']}" data-price="{pv}" data-sale="{1 if c['old'] else 0}" data-search="{search}">
+        cards.append(f'''<a class="cat-card" href="category-{c['no']}.html" data-type="{c['key']}" data-price="{pv}" data-sale="{1 if c['old'] else 0}">
       <div class="cat-thumb">{badge}
         <img loading="lazy" decoding="async" width="520" height="693" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}">
       </div>
@@ -1040,7 +759,6 @@ def render_home(cats, gallery_imgs=None, swatches=None):
     filter_bar = f'''<div class="filter-bar" id="filterBar">
     <div class="chip-row">{"".join(chips)}</div>
     <div class="chip-row sort-row">
-      <label class="search-field">{icon('search', 18)}<input type="search" id="catSearch" placeholder="ძებნა" data-ph-ka="ძებნა" data-ph-en="Search" data-ph-ru="Поиск" aria-label="Search"></label>
       <span class="sort-label">{i18n("დახარისხება","Sort",ru="Сортировка")}</span>
       <button type="button" class="chip" data-sort="price-asc">{i18n("იაფი ჯერ","Price ↑",ru="Сначала дешёвые")}</button>
       <button type="button" class="chip" data-sort="price-desc">{i18n("ძვირი ჯერ","Price ↓",ru="Сначала дорогие")}</button>
@@ -1063,8 +781,7 @@ def render_home(cats, gallery_imgs=None, swatches=None):
       <div class="hero-art"><img src="assets/img/hero.webp" width="1000" height="762" fetchpriority="high" decoding="async" alt="Eurodecor — ევროდეკორის შპალერები"></div>
     </div>
   </section>'''
-    body = f'''{promo_bar()}
-{header_html()}
+    body = f'''{header_html()}
 {hero}
 {contact_bar()}
 <main class="container">
@@ -1076,23 +793,12 @@ def render_home(cats, gallery_imgs=None, swatches=None):
   </div>
 </main>
 {calc_section(cats)}
-{visualizer_section(swatches)}
-{gallery_section(gallery_imgs)}
-{reviews_section()}
-{delivery_section()}
-{newsletter_section()}
-{faq_section()}
 {map_section()}
 {footer_html()}
-<script type="application/ld+json">{faq_schema()}</script>
 {LANG_JS}
 {CALC_JS}
 {FAV_JS.replace("__WA__", BIZ['whatsapp'])}
-{FILTER_JS}
-{PROMO_JS}
-{FAQ_JS}
-{NL_JS.replace("__MAIL__", BIZ['email'])}
-{VIS_JS}'''
+{FILTER_JS}'''
     title_ka = "ევროდეკორი — შპალერების მაღაზია თბილისში"
     title_en = "Eurodecor — Wallpaper Store in Tbilisi"
     desc = "შპალერი, ვინილის შპალერი, ფლიზელინი, შესაღები შპალერი და შპალერის წებო — საუკეთესო ფასებში, პირდაპირ ქარხნიდან. თბილისი, აკაკი წერეთლის 130."
@@ -1142,16 +848,10 @@ def render_category(c):
   <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">{icon('chevL', 30)}</button>
   <figure class="lb-stage"><img id="lb-img" src="" alt=""></figure>
   <button class="lb-nav lb-next" id="lb-next" aria-label="Next">{icon('chevR', 30)}</button>
-  <div class="lb-bar">
-    <span id="lb-cap"></span>
-    <a class="lb-page" id="lb-page" href="#">{icon('search', 18)}<span>{i18n("გვერდი","Page",ru="Страница")}</span></a>
-    <button type="button" class="lb-page" id="lb-share">{icon('share', 18)}<span>{i18n("გაზიარება","Share",ru="Поделиться")}</span></button>
-    <span id="lb-count"></span>
-  </div>
+  <div class="lb-bar"><span id="lb-cap"></span><span id="lb-count"></span></div>
 </div>'''
 
-    body = f'''{promo_bar()}
-{header_html()}
+    body = f'''{header_html()}
 {contact_bar()}
 <main class="container">
   {intro}
@@ -1164,68 +864,13 @@ def render_category(c):
 {lightbox}
 {LANG_JS}
 {LIGHTBOX_JS}
-{FAV_JS.replace("__WA__", BIZ['whatsapp'])}
-{PROMO_JS}'''
+{FAV_JS.replace("__WA__", BIZ['whatsapp'])}'''
     title_ka = f"{c['type_ka']} #{c['no']} — ევროდეკორი"
     title_en = f"{c['type_en']} #{c['no']} — Eurodecor"
     desc = f"{c['type_ka']} #{c['no']}, {c['size']} — ევროდეკორი, თბილისი. საუკეთესო ფასი."
     canonical = f"{BIZ['site_url']}/category-{c['no']}.html"
     return f'''<!doctype html><html lang="ka" data-lang="ka"><head>
 {head(title_ka, title_en, desc, canonical)}
-</head><body>
-{body}
-{ANALYTICS}
-</body></html>'''
-
-# ---------------------------------------------------------------- page: single pattern
-def render_pattern(c, it):
-    num = it["num"]
-    wa_text = quote_plus_ka(f"გამარჯობა! მაინტერესებს ნიმუში #{num} ({c['type_ka']})")
-    d_ka = "".join(f"<li>{esc(x)}</li>" for x in c["desc_ka"])
-    d_en = "".join(f"<li>{esc(x)}</li>" for x in c["desc_en"])
-    d_ru = "".join(f"<li>{esc(x)}</li>" for x in c["desc_ru"])
-    badge = f'<span class="badge badge-dark">{i18n("ფასდაკლება","Sale",ru="Скидка")}</span>' if c["old"] else ""
-    body = f'''{promo_bar()}
-{header_html()}
-{contact_bar()}
-<main class="container">
-  <article class="pat">
-    <nav class="crumb"><a href="index.html">{i18n("მთავარი","Home",ru="Главная")}</a> <span>/</span>
-      <a href="category-{c['no']}.html">{i18n(c['type_ka'], c['type_en'],ru=c['type_ru'])}</a> <span>/</span> #{num}</nav>
-    <div class="pat-grid">
-      <div class="pat-img"><img src="{it['img']}" alt="{esc(c['type_en'])} #{num}"></div>
-      <div class="pat-info">
-        <span class="cat-over">{i18n(c['type_ka'], c['type_en'],ru=c['type_ru'])} · #{num}</span>
-        <h1 class="pat-title">#{num}</h1>
-        <div class="cat-price">{badge}
-          <span class="ka">{price_html(c['old'], c['new'], 'ka')}</span><span class="en">{price_html(c['old'], c['new'], 'en')}</span><span class="ru">{price_html(c['old'], c['new'], 'ru')}</span>
-        </div>
-        <p class="cat-size-big">{esc(c['size'])}</p>
-        <ul class="feat ka">{d_ka}</ul><ul class="feat en">{d_en}</ul><ul class="feat ru">{d_ru}</ul>
-        <div class="pat-cta">
-          <a class="btn btn-gold" href="https://wa.me/{esc(BIZ['whatsapp'])}?text={wa_text}" target="_blank" rel="noopener">{icon('chat')}<span>{i18n("შეკვეთა #"+num,"Order #"+num,ru="Заказать #"+num)}</span></a>
-          <button type="button" class="btn btn-ghost btn-ghost-plum" id="patShare">{icon('share')}<span>{i18n("გაზიარება","Share",ru="Поделиться")}</span></button>
-        </div>
-      </div>
-    </div>
-    <p class="back"><a href="category-{c['no']}.html">← {i18n("სხვა ნიმუშები","More patterns",ru="Другие образцы")}</a></p>
-  </article>
-</main>
-{footer_html()}
-{LANG_JS}
-{PROMO_JS}
-<script>(function(){{var b=document.getElementById('patShare');if(!b)return;b.addEventListener('click',function(){{
-  if(navigator.share){{navigator.share({{title:'Eurodecor #{num}',url:location.href}}).catch(function(){{}});}}
-  else if(navigator.clipboard){{navigator.clipboard.writeText(location.href);b.classList.add('copied');}}
-}});}})();</script>'''
-    title_ka = f"{c['type_ka']} #{num} — ევროდეკორი"
-    title_en = f"{c['type_en']} #{num} — Eurodecor"
-    desc = f"{c['type_ka']} #{num}, {c['size']} — ევროდეკორი, თბილისი."
-    canonical = f"{BIZ['site_url']}/pattern-{num}.html"
-    img_abs = f"{BIZ['site_url']}/{it['img']}"
-    return f'''<!doctype html><html lang="ka" data-lang="ka"><head>
-{head(title_ka, title_en, desc, canonical, preload_img=it['img'])}
-<meta property="og:image" content="{esc(img_abs)}">
 </head><body>
 {body}
 {ANALYTICS}
@@ -1549,127 +1194,6 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
   font-size:1.05rem;color:var(--ink);display:flex;flex-direction:column;gap:2px}}
 .calc-total b{{font-family:var(--serif);color:var(--plum);font-size:1.35rem}}
 .calc-total-rec{{color:var(--muted);font-size:.82rem;font-style:normal}}
-.calc-glue{{display:block;margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(90,34,136,.08);
-  color:var(--plum);font-weight:600;font-size:.92rem}}
-.calc-glue:hover{{background:rgba(90,34,136,.14)}}
-
-/* promo bar */
-.promo-bar{{display:flex;align-items:center;justify-content:center;gap:10px;position:relative;
-  background:linear-gradient(90deg,var(--plum),var(--royal));color:#fff;text-align:center;padding:9px 40px;font-size:.9rem}}
-.promo-link{{color:#fff;font-weight:600}}
-.promo-x{{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;background:transparent;
-  border:none;color:rgba(255,255,255,.8);cursor:pointer;padding:4px}}
-.promo-x:hover{{color:#fff}}
-
-/* search field in filter bar */
-.search-field{{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
-  border-radius:999px;padding:7px 14px;color:var(--muted)}}
-.search-field input{{border:none;background:transparent;font:inherit;font-size:.88rem;color:var(--ink);width:120px;outline:none}}
-
-/* reviews */
-.rv-section{{padding:40px 0 8px}}
-.rv-title,.dl-title,.faq-title,.gl-title,.vz-title{{font-family:var(--serif);text-align:center;color:var(--plum);
-  font-size:1.8rem;font-weight:600;margin:0}}
-.rv-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin:18px 0 22px}}
-.rv-card{{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:0;
-  box-shadow:0 6px 20px rgba(70,28,93,.07)}}
-.rv-stars{{display:flex;gap:3px;margin-bottom:10px}}
-.rv-stars svg,.rv-cta svg{{width:18px;height:18px;color:var(--gold)}}
-.rv-card blockquote{{margin:0 0 12px;color:#40354a;font-size:.96rem;line-height:1.5}}
-.rv-card figcaption{{font-weight:700;color:var(--plum);font-size:.9rem}}
-.rv-empty{{text-align:center;color:var(--muted);max-width:34em;margin:6px auto 20px}}
-.rv-cta{{display:flex;width:max-content;margin:0 auto}}
-.rv-cta svg{{color:#3a2410}}
-
-/* delivery */
-.dl-section{{padding:40px 0 8px}}
-.dl-rows{{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:18px}}
-.dl-row{{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;
-  padding:16px 18px;color:#40354a;font-weight:500}}
-.dl-ic{{font-size:1.6rem;flex:none}}
-
-/* newsletter */
-.nl-section{{padding:40px 0 8px}}
-.nl-card{{display:flex;align-items:center;flex-wrap:wrap;gap:16px 22px;background:linear-gradient(120deg,#39144f,var(--royal));
-  color:#fff;border-radius:20px;padding:26px 28px;box-shadow:0 14px 34px rgba(70,28,93,.2)}}
-.nl-ic{{display:flex;align-items:center;justify-content:center;width:48px;height:48px;flex:none;border-radius:12px;
-  background:rgba(255,255,255,.12);color:var(--gold-l)}}
-.nl-copy{{flex:1 1 260px}}
-.nl-title{{font-family:var(--serif);font-size:1.3rem;margin:0;color:#fff}}
-.nl-sub{{color:rgba(255,255,255,.82);font-size:.92rem;margin:4px 0 0}}
-.nl-form{{display:flex;gap:10px;flex:1 1 300px;flex-wrap:wrap}}
-.nl-form input{{flex:1 1 160px;min-width:0;font:inherit;padding:12px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.3);
-  background:rgba(255,255,255,.95);color:var(--ink)}}
-.nl-form input:focus{{outline:none;border-color:var(--gold-l);box-shadow:0 0 0 3px rgba(228,207,149,.35)}}
-.nl-ok{{flex-basis:100%;color:var(--gold-l);font-weight:600;margin:0}}
-
-/* FAQ */
-.faq-section{{padding:40px 0 8px}}
-.faq-wrap{{max-width:780px}}
-.faq-list{{margin-top:18px;display:flex;flex-direction:column;gap:12px}}
-.faq-item{{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}}
-.faq-q{{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;
-  background:transparent;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:1rem;
-  color:var(--plum);padding:16px 18px}}
-.faq-q .ic{{transition:transform .25s;color:var(--gold)}}
-.faq-item.is-open .faq-q .ic{{transform:rotate(45deg)}}
-.faq-a{{max-height:0;overflow:hidden;transition:max-height .3s ease}}
-.faq-a p{{margin:0;padding:0 18px 16px;color:#40354a;font-size:.95rem;line-height:1.55}}
-
-/* inspiration gallery */
-.gl-section{{padding:40px 0 8px}}
-.gl-grid{{columns:3;column-gap:14px;margin-top:18px}}
-.gl-tile{{margin:0 0 14px;border-radius:14px;overflow:hidden;break-inside:avoid;border:1px solid var(--line);
-  box-shadow:0 6px 18px rgba(70,28,93,.08)}}
-.gl-tile img{{width:100%;display:block}}
-@media(max-width:820px){{.gl-grid{{columns:2}}}}
-@media(max-width:520px){{.gl-grid{{columns:1}}}}
-
-/* room visualizer */
-.vz-section{{padding:40px 0 8px}}
-.vz-sub{{text-align:center;color:var(--muted);margin:6px 0 0}}
-.vz-stage{{position:relative;max-width:760px;margin:18px auto 0;aspect-ratio:16/10;border-radius:18px;overflow:hidden;
-  box-shadow:0 18px 40px rgba(70,28,93,.2);background:#e9e2da}}
-.vz-wall{{position:absolute;inset:0 0 26% 0;background-size:230px;background-repeat:repeat;transition:background-image .2s}}
-.vz-wall::after{{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.14),transparent 30%,rgba(0,0,0,.12))}}
-.vz-floor{{position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(180deg,#c9b79f,#b09a7e)}}
-.vz-frame{{position:absolute;top:16%;left:12%;width:88px;height:112px;border:6px solid #fff;border-radius:3px;
-  background:rgba(70,28,93,.12);box-shadow:0 8px 18px rgba(0,0,0,.22)}}
-.vz-lamp{{position:absolute;right:16%;top:0;width:12px;height:34%;background:linear-gradient(180deg,rgba(0,0,0,.18),transparent)}}
-.vz-lamp::after{{content:"";position:absolute;left:-16px;top:34%;width:44px;height:30px;border-radius:0 0 40px 40px;
-  background:var(--gold-l);box-shadow:0 6px 16px rgba(228,207,149,.5)}}
-.vz-sofa{{position:absolute;left:20%;right:20%;bottom:14%;height:24%;background:#6a5a72;border-radius:22px 22px 10px 10px;
-  box-shadow:0 14px 26px rgba(0,0,0,.28),inset 0 8px 0 rgba(255,255,255,.06)}}
-.vz-sofa::before,.vz-sofa::after{{content:"";position:absolute;bottom:-10%;width:16%;height:34%;background:#5b4d63;border-radius:8px}}
-.vz-sofa::before{{left:6%}}.vz-sofa::after{{right:6%}}
-.vz-tag{{position:absolute;top:12px;right:12px;background:rgba(44,17,64,.72);color:#fff;font-weight:700;
-  font-size:.8rem;padding:5px 12px;border-radius:999px;letter-spacing:.05em}}
-.vz-swatches{{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:16px}}
-.vz-swatch{{width:56px;height:56px;border-radius:12px;background-size:cover;background-position:center;cursor:pointer;
-  border:2px solid transparent;box-shadow:0 4px 12px rgba(70,28,93,.14);transition:.15s}}
-.vz-swatch:hover{{transform:translateY(-2px)}}
-.vz-swatch.is-active{{border-color:var(--gold);box-shadow:0 0 0 3px rgba(194,161,92,.35)}}
-
-/* lightbox page/share buttons */
-.lb-page{{display:inline-flex;align-items:center;gap:6px;color:#fff;background:rgba(255,255,255,.12);border:none;
-  border-radius:999px;padding:6px 14px;font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:.15s}}
-.lb-page:hover{{background:rgba(255,255,255,.24)}}
-.lb-page.copied span{{opacity:0}}
-.lb-page.copied::after{{content:"✓";position:absolute}}
-
-/* single pattern page */
-.pat{{margin:26px 0 10px}}
-.pat-grid{{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start;margin-top:14px}}
-.pat-img{{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 14px 34px rgba(70,28,93,.14);
-  aspect-ratio:3/4;background:var(--royal)}}
-.pat-img img{{width:100%;height:100%;object-fit:cover}}
-.pat-info{{padding-top:6px}}
-.pat-title{{font-family:var(--serif);color:var(--plum);font-size:2.4rem;margin:.2rem 0 .4rem;font-weight:700}}
-.pat-info .feat{{display:block;text-align:left}}
-.pat-cta{{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}}
-.btn-ghost-plum{{border:1px solid var(--plum);color:var(--plum)}}
-.btn-ghost-plum:hover{{background:var(--plum);color:#fff}}
-@media(max-width:700px){{.pat-grid{{grid-template-columns:1fr;gap:22px}}.pat-img{{max-width:420px;margin:0 auto}}}}
 
 @media(max-width:820px){{
   .hero-grid{{grid-template-columns:1fr;min-height:0}}
@@ -1724,27 +1248,14 @@ def main():
             c["thumb"] = "assets/img/logo.webp"
         print(f"  category {c['no']} ({c['type_en']}): {len(c['items'])} items")
 
-    # optional inspiration gallery + room-visualizer swatches (one per wallpaper category)
-    gallery_imgs = build_gallery()
-    swatches = []
-    for c in cats:
-        if c["key"] == "wallpaper" and c["items"]:
-            swatches.append({"img": c["items"][0]["img"], "num": c["items"][0]["num"]})
-    swatches = swatches[:8]
-
     write_css()
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
-        f.write(render_home(cats, gallery_imgs, swatches))
-    npat = 0
+        f.write(render_home(cats))
     for c in cats:
         with open(os.path.join(OUT, f"category-{c['no']}.html"), "w", encoding="utf-8") as f:
             f.write(render_category(c))
-        for it in c["items"]:
-            with open(os.path.join(OUT, f"pattern-{it['num']}.html"), "w", encoding="utf-8") as f:
-                f.write(render_pattern(c, it))
-            npat += 1
 
-    print(f"\nBuilt {len(cats)} categories + {npat} pattern pages -> {OUT}")
+    print(f"\nBuilt {len(cats)} categories -> {OUT}")
 
 if __name__ == "__main__":
     main()
