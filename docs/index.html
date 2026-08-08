@@ -23,6 +23,10 @@
       "telephone":"+995599922749","priceRange":"₾","url":"https://eurodecor.com.ge"
     }</script>
 </head><body>
+<div class="promo-bar" id="promoBar">
+  <a href="index.html#categories" class="promo-link"><span class="ka">🔥 სეზონური ფასდაკლებები მიმდინარეობს — იხილეთ კატალოგი</span><span class="en">🔥 Seasonal sale on now — see the catalog</span><span class="ru">🔥 Идёт сезонная распродажа — смотрите каталог</span></a>
+  <button type="button" class="promo-x" id="promoX" aria-label="დახურვა · Close"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+</div>
 <header class="site-header">
   <a class="brand" href="index.html">
     <span class="brand-mark"><img src="assets/img/mark.webp" alt="Eurodecor"></span>
@@ -79,13 +83,14 @@
   <div class="filter-bar" id="filterBar">
     <div class="chip-row"><button type="button" class="chip is-active" data-filter="all"><span class="ka">ყველა</span><span class="en">All</span><span class="ru">Все</span></button><button type="button" class="chip" data-filter="wallpaper"><span class="ka">შპალერი</span><span class="en">Wallpaper</span><span class="ru">Обои</span></button><button type="button" class="chip" data-filter="paintable"><span class="ka">შესაღები</span><span class="en">Paintable</span><span class="ru">Под покраску</span></button><button type="button" class="chip" data-filter="glue"><span class="ka">წებო</span><span class="en">Glue</span><span class="ru">Клей</span></button><button type="button" class="chip chip-sale" data-filter="sale"><span class="ka">ფასდაკლება</span><span class="en">On sale</span><span class="ru">Скидка</span></button></div>
     <div class="chip-row sort-row">
+      <label class="search-field"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg><input type="search" id="catSearch" placeholder="ძებნა" data-ph-ka="ძებნა" data-ph-en="Search" data-ph-ru="Поиск" aria-label="Search"></label>
       <span class="sort-label"><span class="ka">დახარისხება</span><span class="en">Sort</span><span class="ru">Сортировка</span></span>
       <button type="button" class="chip" data-sort="price-asc"><span class="ka">იაფი ჯერ</span><span class="en">Price ↑</span><span class="ru">Сначала дешёвые</span></button>
       <button type="button" class="chip" data-sort="price-desc"><span class="ka">ძვირი ჯერ</span><span class="en">Price ↓</span><span class="ru">Сначала дорогие</span></button>
     </div>
   </div>
   <div class="cat-grid" id="catGrid">
-    <a class="cat-card" href="category-01.html" data-type="wallpaper" data-price="65" data-sale="1">
+    <a class="cat-card" href="category-01.html" data-type="wallpaper" data-price="65" data-sale="1" data-search="01 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-01.webp" alt="Wallpaper 01">
       </div>
@@ -95,7 +100,7 @@
         <span class="cat-size">1.06m × 10m · #01</span>
       </div>
     </a>
-<a class="cat-card" href="category-02.html" data-type="wallpaper" data-price="55" data-sale="1">
+<a class="cat-card" href="category-02.html" data-type="wallpaper" data-price="55" data-sale="1" data-search="02 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-02.webp" alt="Wallpaper 02">
       </div>
@@ -105,7 +110,7 @@
         <span class="cat-size">1.06m × 10m · #02</span>
       </div>
     </a>
-<a class="cat-card" href="category-03.html" data-type="wallpaper" data-price="75" data-sale="1">
+<a class="cat-card" href="category-03.html" data-type="wallpaper" data-price="75" data-sale="1" data-search="03 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-03.webp" alt="Wallpaper 03">
       </div>
@@ -115,7 +120,7 @@
         <span class="cat-size">1.06m × 10m · #03</span>
       </div>
     </a>
-<a class="cat-card" href="category-04.html" data-type="wallpaper" data-price="40" data-sale="1">
+<a class="cat-card" href="category-04.html" data-type="wallpaper" data-price="40" data-sale="1" data-search="04 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-04.webp" alt="Wallpaper 04">
       </div>
@@ -125,7 +130,7 @@
         <span class="cat-size">1.06m × 10m · #04</span>
       </div>
     </a>
-<a class="cat-card" href="category-05.html" data-type="wallpaper" data-price="15" data-sale="1">
+<a class="cat-card" href="category-05.html" data-type="wallpaper" data-price="15" data-sale="1" data-search="05 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-05.webp" alt="Wallpaper 05">
       </div>
@@ -135,7 +140,7 @@
         <span class="cat-size">0.53m × 10m · #05</span>
       </div>
     </a>
-<a class="cat-card" href="category-06.html" data-type="wallpaper" data-price="18" data-sale="1">
+<a class="cat-card" href="category-06.html" data-type="wallpaper" data-price="18" data-sale="1" data-search="06 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-06.webp" alt="Wallpaper 06">
       </div>
@@ -145,7 +150,7 @@
         <span class="cat-size">0.53m × 10m · #06</span>
       </div>
     </a>
-<a class="cat-card" href="category-07.html" data-type="wallpaper" data-price="20" data-sale="1">
+<a class="cat-card" href="category-07.html" data-type="wallpaper" data-price="20" data-sale="1" data-search="07 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-07.webp" alt="Wallpaper 07">
       </div>
@@ -155,7 +160,7 @@
         <span class="cat-size">1.06m × 10m · #07</span>
       </div>
     </a>
-<a class="cat-card" href="category-08.html" data-type="paintable" data-price="60" data-sale="1">
+<a class="cat-card" href="category-08.html" data-type="paintable" data-price="60" data-sale="1" data-search="08 paintable flizeline შესაღები ფლიზელინი флизелин под покраску">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-08.webp" alt="Paintable flizeline 08">
       </div>
@@ -165,7 +170,7 @@
         <span class="cat-size">1.06m × 10m · #08</span>
       </div>
     </a>
-<a class="cat-card" href="category-09.html" data-type="paintable" data-price="50" data-sale="1">
+<a class="cat-card" href="category-09.html" data-type="paintable" data-price="50" data-sale="1" data-search="09 paintable flizeline შესაღები ფლიზელინი флизелин под покраску">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-09.webp" alt="Paintable flizeline 09">
       </div>
@@ -175,7 +180,7 @@
         <span class="cat-size">1.06m × 10m · #09</span>
       </div>
     </a>
-<a class="cat-card" href="category-10.html" data-type="glue" data-price="10" data-sale="0">
+<a class="cat-card" href="category-10.html" data-type="glue" data-price="10" data-sale="0" data-search="10 wallpaper glue შპალერის წებო клей для обоев">
       <div class="cat-thumb">
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-10.webp" alt="Wallpaper glue 10">
       </div>
@@ -185,7 +190,7 @@
         <span class="cat-size">70-75m² 500g · #10</span>
       </div>
     </a>
-<a class="cat-card" href="category-11.html" data-type="wallpaper" data-price="5" data-sale="1">
+<a class="cat-card" href="category-11.html" data-type="wallpaper" data-price="5" data-sale="1" data-search="11 wallpaper შპალერი обои">
       <div class="cat-thumb"><span class="badge"><span class="ka">ფასდაკლება</span><span class="en">Sale</span><span class="ru">Скидка</span></span>
         <img loading="lazy" decoding="async" width="520" height="693" src="assets/img/card-11.webp" alt="Wallpaper 11">
       </div>
@@ -220,10 +225,74 @@
           <select id="calcPrice"><option value="">—</option><option value="65">#01 · 65 ₾</option><option value="55">#02 · 55 ₾</option><option value="75">#03 · 75 ₾</option><option value="40">#04 · 40 ₾</option><option value="15">#05 · 15 ₾</option><option value="18">#06 · 18 ₾</option><option value="20">#07 · 20 ₾</option><option value="60">#08 · 60 ₾</option><option value="50">#09 · 50 ₾</option><option value="10">#10 · 10 ₾</option><option value="5">#11 · 5 ₾</option></select></label>
       </div>
       <button type="button" id="calcBtn" class="btn btn-gold calc-btn"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 15.5 15.5 2.5a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L8.5 21.5a2 2 0 0 1-2.8 0l-3.2-3.2a2 2 0 0 1 0-2.8z"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/></svg><span><span class="ka">გამოთვლა</span><span class="en">Calculate</span><span class="ru">Рассчитать</span></span></button>
+      <span id="calcGlueData" hidden data-no="10" data-price="10"></span>
       <div class="calc-result" id="calcResult" hidden></div>
     </div>
   </div>
 </section>
+<section class="vz-section" aria-label="Room preview"><div class="container">
+    <h2 class="vz-title"><span class="ka">მოირგეთ კედელზე</span><span class="en">See it on your wall</span><span class="ru">Примерьте на стену</span></h2>
+    <p class="vz-sub"><span class="ka">აირჩიეთ ნიმუში და ნახეთ ოთახში</span><span class="en">Pick a pattern to preview it in a room</span><span class="ru">Выберите образец и посмотрите в комнате</span></p>
+    <span class="leaf-div center"><i></i><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C7.5 6 6 11.5 9 17c.6 1.1 1.7 2.4 3 5 1.3-2.6 2.4-3.9 3-5 3-5.5 1.5-11-3-15z"/><path d="M12 6v11" stroke="rgba(0,0,0,.18)" stroke-width="1" fill="none"/></svg><i></i></span>
+    <div class="vz-stage">
+      <div class="vz-wall" id="vzWall" style="background-image:url(assets/img/c01/0101.webp)"></div>
+      <div class="vz-floor"></div>
+      <div class="vz-lamp"></div>
+      <div class="vz-sofa"></div>
+      <div class="vz-frame"></div>
+      <span class="vz-tag" id="vzTag">#0101</span>
+    </div>
+    <div class="vz-swatches"><button type="button" class="vz-swatch is-active" style="background-image:url(assets/img/c01/0101.webp)" data-img="assets/img/c01/0101.webp" data-num="0101" aria-label="#0101"></button><button type="button" class="vz-swatch" style="background-image:url(assets/img/c02/0201.webp)" data-img="assets/img/c02/0201.webp" data-num="0201" aria-label="#0201"></button><button type="button" class="vz-swatch" style="background-image:url(assets/img/c03/0301.webp)" data-img="assets/img/c03/0301.webp" data-num="0301" aria-label="#0301"></button><button type="button" class="vz-swatch" style="background-image:url(assets/img/c04/0401.webp)" data-img="assets/img/c04/0401.webp" data-num="0401" aria-label="#0401"></button><button type="button" class="vz-swatch" style="background-image:url(assets/img/c05/0501.webp)" data-img="assets/img/c05/0501.webp" data-num="0501" aria-label="#0501"></button><button type="button" class="vz-swatch" style="background-image:url(assets/img/c06/0601.webp)" data-img="assets/img/c06/0601.webp" data-num="0601" aria-label="#0601"></button><button type="button" class="vz-swatch" style="background-image:url(assets/img/c07/0701.webp)" data-img="assets/img/c07/0701.webp" data-num="0701" aria-label="#0701"></button><button type="button" class="vz-swatch" style="background-image:url(assets/img/c11/1101.webp)" data-img="assets/img/c11/1101.webp" data-num="1101" aria-label="#1101"></button></div>
+  </div></section>
+
+<section class="rv-section" aria-label="Reviews"><div class="container"><h2 class="rv-title"><span class="ka">რას ამბობენ მომხმარებლები</span><span class="en">What customers say</span><span class="ru">Отзывы клиентов</span></h2><span class="leaf-div center"><i></i><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C7.5 6 6 11.5 9 17c.6 1.1 1.7 2.4 3 5 1.3-2.6 2.4-3.9 3-5 3-5.5 1.5-11-3-15z"/><path d="M12 6v11" stroke="rgba(0,0,0,.18)" stroke-width="1" fill="none"/></svg><i></i></span><p class="rv-empty"><span class="ka">იყავით პირველი, ვინც შეგვაფასებს — თქვენი აზრი გვეხმარება.</span><span class="en">Be the first to review us — your feedback helps.</span><span class="ru">Станьте первым, кто оставит отзыв — ваше мнение помогает.</span></p><a class="btn btn-gold rv-cta" href="https://maps.app.goo.gl/YRNTNxxe1ZpKK7hP9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.9l-5.8 3.05 1.1-6.45-4.7-4.6 6.5-.95z"/></svg><span><span class="ka">დაგვიტოვეთ შეფასება Google-ზე</span><span class="en">Rate us on Google</span><span class="ru">Оцените нас в Google</span></span></a></div></section>
+<section class="dl-section" aria-label="Delivery"><div class="container">
+    <h2 class="dl-title"><span class="ka">მიწოდება და დაკვრა</span><span class="en">Delivery & installation</span><span class="ru">Доставка и поклейка</span></h2>
+    <span class="leaf-div center"><i></i><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C7.5 6 6 11.5 9 17c.6 1.1 1.7 2.4 3 5 1.3-2.6 2.4-3.9 3-5 3-5.5 1.5-11-3-15z"/><path d="M12 6v11" stroke="rgba(0,0,0,.18)" stroke-width="1" fill="none"/></svg><i></i></span>
+    <div class="dl-rows"><div class="dl-row"><span class="dl-ic">🚚</span><span class="ka">მიწოდება თბილისსა და საქართველოში</span><span class="en">Delivery in Tbilisi & across Georgia</span><span class="ru">Доставка по Тбилиси и Грузии</span></div><div class="dl-row"><span class="dl-ic">🧑‍🔧</span><span class="ka">დახმარება ოსტატის შერჩევაში — გვკითხეთ</span><span class="en">Help arranging a professional installer — just ask</span><span class="ru">Поможем с мастером-поклейщиком — спросите</span></div><div class="dl-row"><span class="dl-ic">💬</span><span class="ka">დეტალებისთვის დაგვირეკეთ ან მოგვწერეთ WhatsApp-ში</span><span class="en">Call or WhatsApp us for details & a quote</span><span class="ru">Звоните или пишите в WhatsApp за деталями</span></div></div>
+  </div></section>
+<section class="nl-section" aria-label="Newsletter"><div class="container nl-card">
+    <span class="nl-ic"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+    <div class="nl-copy">
+      <h2 class="nl-title"><span class="ka">გაიგეთ ახალი კოლექციები და ფასდაკლებები</span><span class="en">Hear about new arrivals & sales</span><span class="ru">Узнавайте о новинках и скидках</span></h2>
+      <p class="nl-sub"><span class="ka">დატოვეთ ელფოსტა — მოგწერთ ახალ ნიმუშებსა და აქციებზე.</span><span class="en">Leave your email — we'll message you about new patterns and offers.</span><span class="ru">Оставьте e-mail — сообщим о новинках и акциях.</span></p>
+    </div>
+    <form class="nl-form" id="nlForm">
+      <input type="email" id="nlEmail" required placeholder="you@email.com" aria-label="Email">
+      <button type="submit" class="btn btn-gold"><span class="ka">გამოწერა</span><span class="en">Subscribe</span><span class="ru">Подписаться</span></button>
+    </form>
+    <p class="nl-ok" id="nlOk" hidden><span class="ka">გმადლობთ! მალე დაგიკავშირდებით.</span><span class="en">Thanks! We'll be in touch.</span><span class="ru">Спасибо! Мы свяжемся с вами.</span></p>
+  </div></section>
+<section class="faq-section" aria-label="FAQ"><div class="container faq-wrap">
+    <h2 class="faq-title"><span class="ka">ხშირად დასმული კითხვები</span><span class="en">Frequently asked questions</span><span class="ru">Частые вопросы</span></h2>
+    <span class="leaf-div center"><i></i><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C7.5 6 6 11.5 9 17c.6 1.1 1.7 2.4 3 5 1.3-2.6 2.4-3.9 3-5 3-5.5 1.5-11-3-15z"/><path d="M12 6v11" stroke="rgba(0,0,0,.18)" stroke-width="1" fill="none"/></svg><i></i></span>
+    <div class="faq-list"><div class="faq-item">
+      <button type="button" class="faq-q" aria-expanded="false">
+        <span><span class="ka">რამდენი შპალერი დამჭირდება?</span><span class="en">How much wallpaper do I need?</span><span class="ru">Сколько обоев мне нужно?</span></span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <div class="faq-a"><p><span class="ka">გამოიყენეთ ჩვენი კალკულატორი — ერთი რულონი ≈ 10 მ სიგრძე. გირჩევთ +1 რულონს მარაგში ჭრისა და ნახატის დასამთხვევად.</span><span class="en">Use our calculator — one roll is ≈10 m long. We recommend one spare roll for cutting and pattern matching.</span><span class="ru">Используйте наш калькулятор — один рулон ≈10 м. Рекомендуем +1 рулон про запас для подрезки и подгонки рисунка.</span></p></div>
+    </div><div class="faq-item">
+      <button type="button" class="faq-q" aria-expanded="false">
+        <span><span class="ka">შპალერი ირეცხება?</span><span class="en">Are the wallpapers washable?</span><span class="ru">Обои моющиеся?</span></span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <div class="faq-a"><p><span class="ka">დიახ — ვინილი ფლიზელინის საფუძველზე, ირეცხება და ტენგამძლეა.</span><span class="en">Yes — vinyl on a non-woven (flizeline) base, washable and moisture-resistant.</span><span class="ru">Да — винил на флизелиновой основе, моющиеся и влагостойкие.</span></p></div>
+    </div><div class="faq-item">
+      <button type="button" class="faq-q" aria-expanded="false">
+        <span><span class="ka">რა ზომისაა რულონი?</span><span class="en">What size is a roll?</span><span class="ru">Какой размер рулона?</span></span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <div class="faq-a"><p><span class="ka">სტანდარტული 1.06 მ × 10 მ; ზოგი ტიპი 0.53 მ × 10 მ.</span><span class="en">Standard 1.06 m × 10 m; some types are 0.53 m × 10 m.</span><span class="ru">Стандарт 1.06 м × 10 м; некоторые типы 0.53 м × 10 м.</span></p></div>
+    </div><div class="faq-item">
+      <button type="button" class="faq-q" aria-expanded="false">
+        <span><span class="ka">აწვდით მიწოდებას?</span><span class="en">Do you deliver?</span><span class="ru">Вы доставляете?</span></span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <div class="faq-a"><p><span class="ka">დიახ — თბილისსა და საქართველოში. დეტალებისთვის მოგვწერეთ WhatsApp-ში.</span><span class="en">Yes — in Tbilisi and across Georgia. Message us on WhatsApp for details.</span><span class="ru">Да — по Тбилиси и Грузии. Напишите нам в WhatsApp за деталями.</span></p></div>
+    </div><div class="faq-item">
+      <button type="button" class="faq-q" aria-expanded="false">
+        <span><span class="ka">როგორ შევუკვეთო?</span><span class="en">How do I order?</span><span class="ru">Как заказать?</span></span><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <div class="faq-a"><p><span class="ka">მოგვწერეთ ნიმუშის ნომერი (მაგ. #0101) WhatsApp-ში ან Messenger-ში, ან ეწვიეთ მაღაზიას.</span><span class="en">Message us the pattern number (e.g. #0101) on WhatsApp or Messenger, or visit the shop.</span><span class="ru">Напишите нам номер образца (напр. #0101) в WhatsApp или Messenger, либо зайдите в магазин.</span></p></div>
+    </div></div>
+  </div></section>
 <section class="map-section" aria-label="Location">
   <div class="container map-inner">
     <div class="map-head">
@@ -293,6 +362,7 @@
   }
 })();
 </script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much wallpaper do I need? / რამდენი შპალერი დამჭირდება?","acceptedAnswer":{"@type":"Answer","text":"Use our calculator — one roll is ≈10 m long. We recommend one spare roll for cutting and pattern matching. / გამოიყენეთ ჩვენი კალკულატორი — ერთი რულონი ≈ 10 მ სიგრძე. გირჩევთ +1 რულონს მარაგში ჭრისა და ნახატის დასამთხვევად."}},{"@type":"Question","name":"Are the wallpapers washable? / შპალერი ირეცხება?","acceptedAnswer":{"@type":"Answer","text":"Yes — vinyl on a non-woven (flizeline) base, washable and moisture-resistant. / დიახ — ვინილი ფლიზელინის საფუძველზე, ირეცხება და ტენგამძლეა."}},{"@type":"Question","name":"What size is a roll? / რა ზომისაა რულონი?","acceptedAnswer":{"@type":"Answer","text":"Standard 1.06 m × 10 m; some types are 0.53 m × 10 m. / სტანდარტული 1.06 მ × 10 მ; ზოგი ტიპი 0.53 მ × 10 მ."}},{"@type":"Question","name":"Do you deliver? / აწვდით მიწოდებას?","acceptedAnswer":{"@type":"Answer","text":"Yes — in Tbilisi and across Georgia. Message us on WhatsApp for details. / დიახ — თბილისსა და საქართველოში. დეტალებისთვის მოგვწერეთ WhatsApp-ში."}},{"@type":"Question","name":"How do I order? / როგორ შევუკვეთო?","acceptedAnswer":{"@type":"Answer","text":"Message us the pattern number (e.g. #0101) on WhatsApp or Messenger, or visit the shop. / მოგვწერეთ ნიმუშის ნომერი (მაგ. #0101) WhatsApp-ში ან Messenger-ში, ან ეწვიეთ მაღაზიას."}}]}</script>
 <script>
 (function(){
   var root=document.documentElement;
@@ -309,6 +379,8 @@
     for(var i=0;i<items.length;i++){
       items[i].setAttribute('aria-selected',items[i].getAttribute('data-lang-set')===l?'true':'false');
     }
+    var ph=document.querySelectorAll('[data-ph-'+l+']');
+    for(var j=0;j<ph.length;j++){ph[j].setAttribute('placeholder',ph[j].getAttribute('data-ph-'+l));}
   }
   function setOpen(o){
     if(!menu||!btn)return;
@@ -371,6 +443,13 @@
       +'<p class="calc-hint"><span class="ka">პერიმეტრი ≈ '+perimeter.toFixed(1)+' მ · '+strips+' ზოლი · '+stripsPerRoll+' ზოლი / რულონი</span>'
       +'<span class="en">Perimeter ≈ '+perimeter.toFixed(1)+' m · '+strips+' strips · '+stripsPerRoll+' strips / roll</span>'
       +'<span class="ru">Периметр ≈ '+perimeter.toFixed(1)+' м · '+strips+' полос · '+stripsPerRoll+' полос / рулон</span></p>';
+    var g=document.getElementById('calcGlueData');
+    if(g){var gno=g.getAttribute('data-no');
+      res.innerHTML+='<a class="calc-glue" href="category-'+gno+'.html">'
+        +'<span class="ka">💧 არ დაგავიწყდეთ შპალერის წებო (#'+gno+')</span>'
+        +'<span class="en">💧 Don\'t forget wallpaper glue (#'+gno+')</span>'
+        +'<span class="ru">💧 Не забудьте клей для обоев (#'+gno+')</span></a>';
+    }
   }
   btn.addEventListener('click',calc);
   ['calcL','calcW','calcH'].forEach(function(id){
@@ -470,6 +549,69 @@
     }
     apply();
   });
+  // search box
+  var box=document.getElementById('catSearch');
+  if(box){
+    box.addEventListener('input',function(){
+      var q=this.value.trim().toLowerCase();
+      cards.forEach(function(c){
+        var hay=(c.getAttribute('data-search')||'');
+        var typeOk = filter==='all' ? true : filter==='sale' ? c.getAttribute('data-sale')==='1' : c.getAttribute('data-type')===filter;
+        c.style.display=(typeOk && (!q || hay.indexOf(q)>-1))?'':'none';
+      });
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var bar=document.getElementById('promoBar');if(!bar)return;
+  if(localStorage.getItem('promoHidden')==='1'){bar.style.display='none';return;}
+  var x=document.getElementById('promoX');
+  if(x)x.addEventListener('click',function(){bar.style.display='none';localStorage.setItem('promoHidden','1');});
+})();
+</script>
+<script>
+(function(){
+  var qs=document.querySelectorAll('.faq-q');
+  for(var i=0;i<qs.length;i++){
+    qs[i].addEventListener('click',function(){
+      var open=this.getAttribute('aria-expanded')==='true';
+      this.setAttribute('aria-expanded',open?'false':'true');
+      var a=this.nextElementSibling;
+      a.style.maxHeight=open?null:a.scrollHeight+'px';
+      this.parentNode.classList.toggle('is-open',!open);
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var f=document.getElementById('nlForm');if(!f)return;
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var email=document.getElementById('nlEmail').value.trim();
+    if(!email)return;
+    var sub=encodeURIComponent('New arrivals sign-up'),body=encodeURIComponent('Please add me to new arrivals & sales: '+email);
+    window.location.href='mailto:eurodecor.wallpaper@gmail.com?subject='+sub+'&body='+body;
+    f.style.display='none';
+    var ok=document.getElementById('nlOk');if(ok)ok.hidden=false;
+  });
+})();
+</script>
+<script>
+(function(){
+  var wall=document.getElementById('vzWall'),tag=document.getElementById('vzTag');
+  var sws=document.querySelectorAll('.vz-swatch');
+  if(!wall||!sws.length)return;
+  for(var i=0;i<sws.length;i++){
+    sws[i].addEventListener('click',function(){
+      wall.style.backgroundImage='url('+this.getAttribute('data-img')+')';
+      if(tag)tag.textContent='#'+this.getAttribute('data-num');
+      for(var j=0;j<sws.length;j++)sws[j].classList.remove('is-active');
+      this.classList.add('is-active');
+    });
+  }
 })();
 </script>
 <!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a14e153b08084af595898b33aef479fe"}'></script><!-- End Cloudflare Web Analytics -->
