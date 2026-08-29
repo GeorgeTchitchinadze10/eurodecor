@@ -6,7 +6,7 @@ and writes a static site into ./docs (ready for GitHub Pages).
 
 Run:  py build.py
 """
-import os, re, shutil, html
+import os, re, shutil, html, datetime
 import openpyxl
 from PIL import Image, ImageOps
 
@@ -40,6 +40,7 @@ BIZ = {
     "hours_en": "Every day 10:00 – 19:00",
     "hours_ru": "Ежедневно 10:00 – 19:00",
     "site_url": "https://eurodecor.com.ge",
+    "geo": (41.74599730813633, 44.77777287260151),  # shop lat/lng for local-SEO schema
 }
 
 # custom domain written to docs/CNAME on every build
@@ -310,23 +311,48 @@ FONT_URL = ("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;
             "&family=Noto+Serif+Georgian:wght@600;700"
             "&family=Noto+Sans+Georgian:wght@400;600&display=swap")
 
-def head(title_ka, title_en, desc_ka, canonical, preload_img=None):
+def head(title_ka, title_en, desc_ka, canonical, preload_img=None, og_image=None, extra_ld=None):
     preload = f'\n<link rel="preload" as="image" href="{preload_img}" fetchpriority="high">' if preload_img else ""
+    og_img = og_image or (BIZ["site_url"] + "/assets/img/logo.webp")
+    lat, lng = BIZ["geo"]
     ld = f'''{{
       "@context":"https://schema.org","@type":"HomeGoodsStore",
+      "@id":"{esc(BIZ["site_url"])}/#store",
       "name":"Eurodecor {esc(BIZ["sub_en"])}",
       "image":"{esc(BIZ["site_url"])}/assets/img/logo.webp",
-      "address":{{"@type":"PostalAddress","streetAddress":"{esc(BIZ["address_en"])}","addressLocality":"Tbilisi","addressCountry":"GE"}},
-      "telephone":"{esc(BIZ["phone_tel"])}","priceRange":"₾","url":"{esc(BIZ["site_url"])}"
+      "logo":"{esc(BIZ["site_url"])}/assets/img/logo.webp",
+      "url":"{esc(BIZ["site_url"])}",
+      "telephone":"{esc(BIZ["phone_tel"])}",
+      "email":"{esc(BIZ["email"])}",
+      "priceRange":"₾","currenciesAccepted":"GEL",
+      "address":{{"@type":"PostalAddress","streetAddress":"{esc(BIZ["address_en"])}","addressLocality":"Tbilisi","postalCode":"0119","addressCountry":"GE"}},
+      "geo":{{"@type":"GeoCoordinates","latitude":{lat},"longitude":{lng}}},
+      "hasMap":"{esc(BIZ["maps"])}",
+      "openingHoursSpecification":{{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"10:00","closes":"19:00"}},
+      "sameAs":["{esc(BIZ["facebook"])}"]
     }}'''
+    ld_block = f'<script type="application/ld+json">{ld}</script>'
+    if extra_ld:
+        ld_block += f'\n<script type="application/ld+json">{extra_ld}</script>'
     return f'''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title_ka)} | {esc(title_en)}</title>
 <meta name="description" content="{esc(desc_ka)}">
 <link rel="canonical" href="{esc(canonical)}">
+<meta name="robots" content="index,follow">
+<meta property="og:site_name" content="Eurodecor">
 <meta property="og:title" content="{esc(title_ka)} | {esc(title_en)}">
 <meta property="og:description" content="{esc(desc_ka)}">
-<meta property="og:type" content="website">{preload}
+<meta property="og:type" content="website">
+<meta property="og:url" content="{esc(canonical)}">
+<meta property="og:image" content="{esc(og_img)}">
+<meta property="og:locale" content="ka_GE">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{esc(title_ka)} | {esc(title_en)}">
+<meta name="twitter:description" content="{esc(desc_ka)}">
+<meta name="twitter:image" content="{esc(og_img)}">{preload}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="{FONT_URL}">
@@ -334,7 +360,7 @@ def head(title_ka, title_en, desc_ka, canonical, preload_img=None):
 <noscript><link rel="stylesheet" href="{FONT_URL}"></noscript>
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" href="assets/img/logo.webp">
-<script type="application/ld+json">{ld}</script>'''
+{ld_block}'''
 
 def header_html():
     return f'''<header class="site-header">
@@ -803,7 +829,7 @@ def render_home(cats):
     title_en = "Eurodecor — Wallpaper Store in Tbilisi"
     desc = "შპალერი, ვინილის შპალერი, ფლიზელინი, შესაღები შპალერი და შპალერის წებო — საუკეთესო ფასებში, პირდაპირ ქარხნიდან. თბილისი, აკაკი წერეთლის 130."
     return f'''<!doctype html><html lang="ka" data-lang="ka"><head>
-{head(title_ka, title_en, desc, BIZ["site_url"] + "/", preload_img="assets/img/hero.webp")}
+{head(title_ka, title_en, desc, BIZ["site_url"] + "/", preload_img="assets/img/hero.webp", og_image=BIZ["site_url"] + "/assets/img/hero.webp")}
 </head><body>
 {body}
 {ANALYTICS}
@@ -865,12 +891,25 @@ def render_category(c):
 {LANG_JS}
 {LIGHTBOX_JS}
 {FAV_JS.replace("__WA__", BIZ['whatsapp'])}'''
-    title_ka = f"{c['type_ka']} #{c['no']} — ევროდეკორი"
-    title_en = f"{c['type_en']} #{c['no']} — Eurodecor"
-    desc = f"{c['type_ka']} #{c['no']}, {c['size']} — ევროდეკორი, თბილისი. საუკეთესო ფასი."
+    title_ka = f"{c['type_ka']} #{c['no']} თბილისში — ევროდეკორი"
+    title_en = f"{c['type_en']} #{c['no']} in Tbilisi — Eurodecor"
+    desc = f"{c['type_ka']} #{c['no']}, {c['size']} — ევროდეკორი, თბილისი, აკაკი წერეთლის 130. საუკეთესო ფასი."
     canonical = f"{BIZ['site_url']}/category-{c['no']}.html"
+    prod_img = (f"{BIZ['site_url']}/{c['items'][0]['img']}" if c.get("items")
+                else f"{BIZ['site_url']}/assets/img/logo.webp")
+    pv = price_num(c["new"])
+    offer = ""
+    if pv:
+        offer = (f',"offers":{{"@type":"Offer","priceCurrency":"GEL","price":"{pv}",'
+                 f'"availability":"https://schema.org/InStock","url":"{esc(canonical)}",'
+                 f'"seller":{{"@id":"{esc(BIZ["site_url"])}/#store"}}}}')
+    prod_ld = (f'{{"@context":"https://schema.org","@type":"Product",'
+               f'"name":"{esc(c["type_en"])} #{c["no"]} — Eurodecor",'
+               f'"image":"{esc(prod_img)}",'
+               f'"description":"{esc(c["type_en"])} #{c["no"]}, {esc(c["size"])}, Eurodecor Tbilisi",'
+               f'"brand":{{"@type":"Brand","name":"Eurodecor"}}{offer}}}')
     return f'''<!doctype html><html lang="ka" data-lang="ka"><head>
-{head(title_ka, title_en, desc, canonical)}
+{head(title_ka, title_en, desc, canonical, og_image=prod_img, extra_ld=prod_ld)}
 </head><body>
 {body}
 {ANALYTICS}
@@ -1255,7 +1294,29 @@ def main():
         with open(os.path.join(OUT, f"category-{c['no']}.html"), "w", encoding="utf-8") as f:
             f.write(render_category(c))
 
+    write_sitemap(cats)
     print(f"\nBuilt {len(cats)} categories -> {OUT}")
+
+
+def write_sitemap(cats):
+    """sitemap.xml + robots.txt so crawlers discover every page."""
+    base = BIZ["site_url"]
+    today = datetime.date.today().isoformat()
+    urls = [(base + "/", "1.0")]
+    urls += [(f"{base}/category-{c['no']}.html", "0.8") for c in cats]
+    entries = "\n".join(
+        f'  <url><loc>{u}</loc><lastmod>{today}</lastmod>'
+        f'<changefreq>weekly</changefreq><priority>{p}</priority></url>'
+        for u, p in urls)
+    sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+               f'{entries}\n</urlset>\n')
+    with open(os.path.join(OUT, "sitemap.xml"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(sitemap)
+    robots = f"User-agent: *\nAllow: /\n\nSitemap: {base}/sitemap.xml\n"
+    with open(os.path.join(OUT, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(robots)
+    print(f"  sitemap.xml ({len(urls)} urls) + robots.txt")
 
 if __name__ == "__main__":
     main()
