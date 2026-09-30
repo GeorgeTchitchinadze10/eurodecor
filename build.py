@@ -205,45 +205,57 @@ def read_categories():
 
 # ---------------------------------------------------------------- scan + build item images
 def build_items(cat):
-    """Scan the source folder for a category, optimize images, return item list."""
-    folder = os.path.join(ROOT, f"category {int(cat['no'])}")
-    if not os.path.isdir(folder):
-        return []
-    files = [f for f in os.listdir(folder) if f.lower().endswith(IMG_EXT)]
+    """Scan the source folder for a category, optimize images, return item list.
 
+    Images in a `new/` subfolder are flagged as new-collection items (is_new).
+    cat['has_new'] is set True when the category contains any such item.
+    """
+    folder = os.path.join(ROOT, f"category {int(cat['no'])}")
     out_dir = os.path.join(IMG_OUT, f"c{cat['no']}")
     os.makedirs(out_dir, exist_ok=True)
 
-    # Numbered files (category 1 style): "#0101.png", "#0101 (2).png"
-    numbered = {}
-    plain = []
-    for f in files:
-        m = re.match(r"#?\s*(\d{3,4})\s*(\(2\))?", f)
-        if m and f.lstrip().startswith("#"):
-            num = m.group(1)
-            numbered.setdefault(num, {"main": None, "detail": None})
-            if m.group(2):
-                numbered[num]["detail"] = f
-            else:
-                numbered[num]["main"] = f
-        else:
-            plain.append(f)
-
     items = []
-    if numbered:
-        for num in sorted(numbered):
-            src_name = numbered[num]["main"] or numbered[num]["detail"]
-            src = os.path.join(folder, src_name)
-            dst_name = f"{num}.webp"
-            optimize(src, os.path.join(out_dir, dst_name))
-            items.append({"num": num, "img": f"assets/img/c{cat['no']}/{dst_name}"})
-    else:
-        for i, f in enumerate(sorted(plain), start=1):
-            num = f"{cat['no']}{i:02d}"
-            src = os.path.join(folder, f)
-            dst_name = f"{num}.webp"
-            optimize(src, os.path.join(out_dir, dst_name))
-            items.append({"num": num, "img": f"assets/img/c{cat['no']}/{dst_name}"})
+
+    # --- existing items in the main folder ---
+    if os.path.isdir(folder):
+        files = [f for f in os.listdir(folder) if f.lower().endswith(IMG_EXT)]
+
+        # Numbered files (category 1 style): "#0101.png", "#0101 (2).png"
+        numbered = {}
+        plain = []
+        for f in files:
+            m = re.match(r"#?\s*(\d{3,4})\s*(\(2\))?", f)
+            if m and f.lstrip().startswith("#"):
+                num = m.group(1)
+                numbered.setdefault(num, {"main": None, "detail": None})
+                if m.group(2):
+                    numbered[num]["detail"] = f
+                else:
+                    numbered[num]["main"] = f
+            else:
+                plain.append(f)
+
+        if numbered:
+            for num in sorted(numbered):
+                src_name = numbered[num]["main"] or numbered[num]["detail"]
+                optimize(os.path.join(folder, src_name), os.path.join(out_dir, f"{num}.webp"))
+                items.append({"num": num, "img": f"assets/img/c{cat['no']}/{num}.webp", "is_new": False})
+        else:
+            for i, f in enumerate(sorted(plain), start=1):
+                num = f"{cat['no']}{i:02d}"
+                optimize(os.path.join(folder, f), os.path.join(out_dir, f"{num}.webp"))
+                items.append({"num": num, "img": f"assets/img/c{cat['no']}/{num}.webp", "is_new": False})
+
+    # --- new-collection items: a `new/` subfolder, numbered continuing the sequence ---
+    new_folder = os.path.join(folder, "new")
+    if os.path.isdir(new_folder):
+        nfiles = sorted(f for f in os.listdir(new_folder) if f.lower().endswith(IMG_EXT))
+        for k, f in enumerate(nfiles, start=len(items) + 1):
+            num = f"{cat['no']}{k:02d}"
+            optimize(os.path.join(new_folder, f), os.path.join(out_dir, f"{num}.webp"))
+            items.append({"num": num, "img": f"assets/img/c{cat['no']}/{num}.webp", "is_new": True})
+
+    cat["has_new"] = any(it.get("is_new") for it in items)
     return items
 
 # ---------------------------------------------------------------- HTML fragments
@@ -724,6 +736,7 @@ FILTER_JS = '''<script>
     cards.forEach(function(c){
       var ok = filter==='all' ? true
              : filter==='sale' ? c.getAttribute('data-sale')==='1'
+             : filter==='new' ? c.getAttribute('data-new')==='1'
              : c.getAttribute('data-type')===filter;
       c.style.display=ok?'':'none';
     });
@@ -756,9 +769,10 @@ def render_home(cats):
     for c in cats:
         first_img = c.get("thumb", "assets/img/logo.webp")
         badge = f'<span class="badge">{i18n("ფასდაკლება","Sale",ru="Скидка")}</span>' if c["old"] else ""
+        new_badge = f'<span class="badge-new">{i18n("ახალი","New",ru="Новинка")}</span>' if c.get("has_new") else ""
         pv = price_num(c["new"]) or 0
-        cards.append(f'''<a class="cat-card" href="category-{c['no']}.html" data-type="{c['key']}" data-price="{pv}" data-sale="{1 if c['old'] else 0}">
-      <div class="cat-thumb">{badge}
+        cards.append(f'''<a class="cat-card" href="category-{c['no']}.html" data-type="{c['key']}" data-price="{pv}" data-sale="{1 if c['old'] else 0}" data-new="{1 if c.get('has_new') else 0}">
+      <div class="cat-thumb">{badge}{new_badge}
         <img loading="lazy" decoding="async" width="520" height="693" src="{first_img}" alt="{esc(c['type_en'])} {c['no']}">
       </div>
       <div class="cat-body">
@@ -780,6 +794,8 @@ def render_home(cats):
     for k in present:
         ka, en, ru = type_labels[k]
         chips.append(f'<button type="button" class="chip" data-filter="{k}">{i18n(ka, en, ru=ru)}</button>')
+    if any(c.get("has_new") for c in cats):
+        chips.append(f'<button type="button" class="chip chip-new" data-filter="new">{i18n("ახალი კოლექცია","New collection",ru="Новинки")}</button>')
     if any(c["old"] for c in cats):
         chips.append(f'<button type="button" class="chip chip-sale" data-filter="sale">{i18n("ფასდაკლება","On sale",ru="Скидка")}</button>')
     filter_bar = f'''<div class="filter-bar" id="filterBar">
@@ -842,6 +858,7 @@ def render_category(c):
         items.append(f'''<figure class="item" data-num="{it['num']}" data-cat="{c['no']}" data-img="{it['img']}" tabindex="0" role="button" aria-label="#{it['num']}">
       <div class="item-img">
         <img loading="lazy" src="{it['img']}" alt="{esc(c['type_en'])} #{it['num']}">
+        {'<span class="item-new">' + i18n("ახალი","New",ru="Новинка") + '</span>' if it.get('is_new') else ''}
         <button type="button" class="fav" data-num="{it['num']}" aria-label="შენახვა · Save">{HEART_SVG}</button>
         <span class="zoom">{icon('zoom')}</span>
       </div>
@@ -858,6 +875,7 @@ def render_category(c):
     <nav class="crumb"><a href="index.html">{i18n("მთავარი","Home",ru="Главная")}</a> <span>/</span> #{c['no']}</nav>
     <span class="cat-over">{i18n(c['type_ka'], c['type_en'],ru=c['type_ru'])} · #{c['no']}</span>
     <h1 class="cat-title">{i18n(c['type_ka'], c['type_en'],"span",ru=c['type_ru'])}</h1>
+    {'<div class="new-banner">' + i18n("ახალი კოლექცია","New Collection",ru="Новая коллекция") + '</div>' if c.get("has_new") else ''}
     {leaf_div(center=True)}
     <div class="cat-price">{badge}
       <span class="ka">{price_html(c['old'], c['new'], 'ka')}</span><span class="en">{price_html(c['old'], c['new'], 'en')}</span><span class="ru">{price_html(c['old'], c['new'], 'ru')}</span>
@@ -1036,6 +1054,20 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
 .badge{{position:absolute;top:14px;left:14px;z-index:3;background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#3a2410;
   font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:5px 12px;border-radius:999px;
   box-shadow:0 3px 10px rgba(0,0,0,.18)}}
+/* new-collection markers (photoshoot 2.0) */
+.badge-new{{position:absolute;top:14px;right:14px;z-index:4;
+  background:linear-gradient(135deg,var(--royal-2),var(--plum));color:var(--gold-l);
+  font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:5px 12px;border-radius:999px;
+  box-shadow:0 3px 11px rgba(0,0,0,.25);border:1px solid rgba(226,207,149,.5)}}
+.item-new{{position:absolute;top:11px;left:11px;z-index:4;
+  background:linear-gradient(135deg,var(--royal-2),var(--plum));color:var(--gold-l);
+  font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:999px;
+  box-shadow:0 3px 9px rgba(0,0,0,.28)}}
+.new-banner{{display:inline-flex;align-items:center;gap:9px;margin-top:14px;
+  background:linear-gradient(135deg,var(--royal-2),var(--plum));color:var(--gold-l);
+  font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:8px 18px;border-radius:999px;
+  box-shadow:0 5px 16px rgba(70,28,93,.22)}}
+.new-banner::before,.new-banner::after{{content:"";width:16px;height:1px;background:rgba(226,207,149,.6)}}
 .cat-body{{padding:16px 18px 20px;text-align:center}}
 .cat-type{{display:block;font-weight:600;color:var(--ink);font-size:1.06rem}}
 .price-wrap{{margin:9px 0 5px}}
@@ -1226,6 +1258,8 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
 .chip:hover{{border-color:var(--plum)}}
 .chip.is-active{{background:var(--plum);color:#fff;border-color:var(--plum)}}
 .chip-sale.is-active{{background:var(--sale);border-color:var(--sale)}}
+.chip-new{{border-color:var(--royal-2);color:var(--plum)}}
+.chip-new.is-active{{background:var(--plum);border-color:var(--plum);color:var(--gold-l)}}
 .sort-label{{color:var(--muted);font-size:.82rem;font-weight:600;letter-spacing:.04em}}
 
 /* calculator total */

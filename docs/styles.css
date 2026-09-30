@@ -117,6 +117,20 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{display:none !important}
 .badge{position:absolute;top:14px;left:14px;z-index:3;background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#3a2410;
   font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:5px 12px;border-radius:999px;
   box-shadow:0 3px 10px rgba(0,0,0,.18)}
+/* new-collection markers (photoshoot 2.0) */
+.badge-new{position:absolute;top:14px;right:14px;z-index:4;
+  background:linear-gradient(135deg,var(--royal-2),var(--plum));color:var(--gold-l);
+  font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:5px 12px;border-radius:999px;
+  box-shadow:0 3px 11px rgba(0,0,0,.25);border:1px solid rgba(226,207,149,.5)}
+.item-new{position:absolute;top:11px;left:11px;z-index:4;
+  background:linear-gradient(135deg,var(--royal-2),var(--plum));color:var(--gold-l);
+  font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:999px;
+  box-shadow:0 3px 9px rgba(0,0,0,.28)}
+.new-banner{display:inline-flex;align-items:center;gap:9px;margin-top:14px;
+  background:linear-gradient(135deg,var(--royal-2),var(--plum));color:var(--gold-l);
+  font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:8px 18px;border-radius:999px;
+  box-shadow:0 5px 16px rgba(70,28,93,.22)}
+.new-banner::before,.new-banner::after{content:"";width:16px;height:1px;background:rgba(226,207,149,.6)}
 .cat-body{padding:16px 18px 20px;text-align:center}
 .cat-type{display:block;font-weight:600;color:var(--ink);font-size:1.06rem}
 .price-wrap{margin:9px 0 5px}
@@ -307,6 +321,8 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{display:none !important}
 .chip:hover{border-color:var(--plum)}
 .chip.is-active{background:var(--plum);color:#fff;border-color:var(--plum)}
 .chip-sale.is-active{background:var(--sale);border-color:var(--sale)}
+.chip-new{border-color:var(--royal-2);color:var(--plum)}
+.chip-new.is-active{background:var(--plum);border-color:var(--plum);color:var(--gold-l)}
 .sort-label{color:var(--muted);font-size:.82rem;font-weight:600;letter-spacing:.04em}
 
 /* calculator total */
