@@ -352,3 +352,6 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{display:none !important}
   .lb-nav{width:44px;height:44px}
   .lb-prev{left:8px}.lb-next{right:8px}
 }
+.foot-about{margin-top:12px;max-width:40ch;color:#b9a9c9;font-size:.74rem;line-height:1.55;opacity:.85}
+.cat-desc{max-width:680px;margin:16px auto 2px;line-height:1.68}
+.cat-desc p{color:#5a5064;font-size:.99rem;margin:.45em 0}

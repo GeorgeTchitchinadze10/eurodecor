@@ -475,6 +475,7 @@ def footer_html():
     <div>
       <span class="foot-mark"><img src="assets/img/mark.webp" alt="Eurodecor"></span>
       <p class="foot-tag">{i18n("პირდაპირ ქარხნიდან · 25 წლიანი გამოცდილება","Factory-direct · 25 years of experience","span",ru="Напрямую с фабрики · 25 лет опыта")}</p>
+      {foot_about()}
     </div>
     <div>
       <h2>{i18n("კონტაქტი","Contact","span",ru="Контакты")}</h2>
@@ -764,6 +765,64 @@ FILTER_JS = '''<script>
 </script>'''
 
 # ---------------------------------------------------------------- page: home
+def cat_prose(c):
+    """Keyword-rich descriptive paragraph for a category page (KA/EN/RU)."""
+    no, size, key = c["no"], c["size"], c["key"]
+    ka_sz = f"რულონის ზომა {size}. " if size else ""
+    en_sz = f"Roll size {size}. " if size else ""
+    ru_sz = f"Размер рулона {size}. " if size else ""
+    if key == "paintable":
+        ka = (f"შესაღები ფლიზელინი (#{no}) — საღებავისთვის მზა ზედაპირი, რომელსაც სასურველ ფერში "
+              f"შეღებავთ და საჭიროებისას ხელახლა გადააფერადებთ. {ka_sz}ევროდეკორი გთავაზობთ ფლიზელინსა "
+              f"და შპალერს საუკეთესო ფასად თბილისში, აკაკი წერეთლის გამზირი 130. ხელმისაწვდომია მიწოდება.")
+        en = (f"Paintable flizeline #{no} has a ready-to-paint surface you can colour in any shade and "
+              f"repaint later. {en_sz}Eurodecor offers flizeline and wallpaper at the best prices in "
+              f"Tbilisi, 130 Akaki Tsereteli Ave. Delivery available.")
+        ru = (f"Флизелин под покраску #{no} — поверхность, готовая к покраске в любой цвет с возможностью "
+              f"перекраски. {ru_sz}«Евродекор» предлагает флизелин и обои по лучшим ценам в Тбилиси, "
+              f"проспект Акакия Церетели 130. Доступна доставка.")
+    elif key == "glue":
+        ka = ("შპალერის წებო — უნივერსალური წებო ყველა ტიპის შპალერისთვის. ადვილად იხსნება, ძლიერი "
+              "შეჭიდულობით; დაახლოებით 70–75 მ² დაფარვა. ევროდეკორში იყიდება შპალერთან ერთად საუკეთესო "
+              "ფასად, თბილისში, აკაკი წერეთლის გამზირი 130.")
+        en = ("Wallpaper glue — a universal adhesive for all wallpaper types. Easy to mix, strong hold, "
+              "covers roughly 70–75 m². Available at Eurodecor alongside your wallpaper at the best price, "
+              "130 Akaki Tsereteli Ave, Tbilisi.")
+        ru = ("Клей для обоев — универсальный клей для всех типов обоев. Легко разводится, прочное "
+              "сцепление, покрытие примерно 70–75 м². В «Евродекор» — вместе с обоями по лучшей цене, "
+              "Тбилиси, проспект Акакия Церетели 130.")
+    else:  # wallpaper
+        ka = (f"ეს შპალერი (#{no}) დამზადებულია ვინილისგან ფლიზელინის ბაზაზე — რეცხვადი და ტენგამძლე, "
+              f"ადვილად გასაკრავი. {ka_sz}შესანიშნავი არჩევანია საძინებლის, მისაღებისა თუ დერეფნის "
+              f"კედლებისთვის. ევროდეკორში შპალერების დიდი არჩევანი გელოდებათ საუკეთესო ფასად, პირდაპირ "
+              f"ქარხნიდან. მოგვინახულეთ თბილისში, აკაკი წერეთლის გამზირი 130, ან შეუკვეთეთ მიწოდებით "
+              f"საქართველოს მასშტაბით.")
+        en = (f"Wallpaper #{no} is made of vinyl on a non-woven (flizeline) base — washable, "
+              f"moisture-resistant and easy to hang. {en_sz}A great choice for bedrooms, living rooms and "
+              f"hallways. At Eurodecor you'll find a huge selection of wallpaper at the best prices, "
+              f"factory-direct. Visit us in Tbilisi at 130 Akaki Tsereteli Ave, or order with delivery "
+              f"across Georgia.")
+        ru = (f"Обои #{no} — винил на флизелиновой основе: моющиеся, влагостойкие и лёгкие в поклейке. "
+              f"{ru_sz}Отличный выбор для спальни, гостиной и коридора. В «Евродекор» — большой выбор обоев "
+              f"по лучшим ценам, напрямую с фабрики. Приходите в Тбилиси, проспект Акакия Церетели 130, "
+              f"или закажите доставку по Грузии.")
+    return f'<div class="cat-desc">{i18n(ka, en, "p", ru=ru)}</div>'
+
+
+def foot_about():
+    """Small, low-key SEO blurb for the footer (KA/EN/RU)."""
+    ka = ("ევროდეკორი — შპალერების მაღაზია თბილისში. ვინილის შპალერი ფლიზელინის ბაზაზე, შესაღები "
+          "ფლიზელინი და შპალერის წებო საუკეთესო ფასად, პირდაპირ ქარხნიდან. რეცხვადი, ტენგამძლე, "
+          "ადვილად გასაკრავი. მიწოდება საქართველოს მასშტაბით.")
+    en = ("Eurodecor — wallpaper store in Tbilisi. Vinyl wallpaper on a flizeline base, paintable "
+          "flizeline and wallpaper glue at the best prices, factory-direct. Washable, moisture-resistant, "
+          "easy to hang. Delivery across Georgia.")
+    ru = ("«Евродекор» — магазин обоев в Тбилиси. Виниловые обои на флизелиновой основе, флизелин под "
+          "покраску и клей для обоев по лучшим ценам, напрямую с фабрики. Моющиеся, влагостойкие, "
+          "легко клеить. Доставка по Грузии.")
+    return f'<p class="foot-about">{i18n(ka, en, "span", ru=ru)}</p>'
+
+
 def render_home(cats):
     cards = []
     for c in cats:
@@ -884,6 +943,7 @@ def render_category(c):
     <ul class="feat ka">{d_ka}</ul>
     <ul class="feat en">{d_en}</ul>
     <ul class="feat ru">{d_ru}</ul>
+    {cat_prose(c)}
     <p class="order-hint">{i18n("მოგწონთ რომელიმე? მოგვწერეთ ნომერი (მაგ. #"+c['no']+"01) Messenger-ში ან WhatsApp-ში.","Like one? Message us the number (e.g. #"+c['no']+"01) on Messenger or WhatsApp.",ru="Понравился какой-то? Напишите нам номер (напр. #"+c['no']+"01) в Messenger или WhatsApp.")}</p>
   </section>'''
 
@@ -1289,6 +1349,9 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
   .lb-nav{{width:44px;height:44px}}
   .lb-prev{{left:8px}}.lb-next{{right:8px}}
 }}
+.foot-about{{margin-top:12px;max-width:40ch;color:#b9a9c9;font-size:.74rem;line-height:1.55;opacity:.85}}
+.cat-desc{{max-width:680px;margin:16px auto 2px;line-height:1.68}}
+.cat-desc p{{color:#5a5064;font-size:.99rem;margin:.45em 0}}
 '''
     with open(os.path.join(OUT, "styles.css"), "w", encoding="utf-8") as f:
         f.write(css)
