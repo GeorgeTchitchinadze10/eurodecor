@@ -561,10 +561,22 @@ STATUS_JS = '''<script>
 </script>'''
 
 # Cloudflare Web Analytics — privacy-first, no cookies, no consent banner
+# Google Analytics 4 — paste the Measurement ID here (looks like G-XXXXXXXXXX), then re-run build.
+# Leave "" to keep GA4 off (Cloudflare analytics still runs regardless).
+GA4_ID = "G-2X9VH4FGCS"
+
+_ga4 = ''
+if GA4_ID:
+    _ga4 = ('<!-- Google Analytics 4 -->'
+      f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA4_ID}"></script>'
+      '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
+      f"gtag('js',new Date());gtag('config','{GA4_ID}');</script>"
+      '<!-- End Google Analytics 4 -->')
+
 ANALYTICS = ('<!-- Cloudflare Web Analytics -->'
   '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" '
   'data-cf-beacon=\'{"token": "a14e153b08084af595898b33aef479fe"}\'></script>'
-  '<!-- End Cloudflare Web Analytics -->')
+  '<!-- End Cloudflare Web Analytics -->' + _ga4)
 
 CALC_JS = '''<script>
 (function(){
