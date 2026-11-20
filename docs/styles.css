@@ -355,3 +355,70 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{display:none !important}
 .foot-about{margin-top:12px;max-width:40ch;color:#b9a9c9;font-size:.74rem;line-height:1.55;opacity:.85}
 .cat-desc{max-width:680px;margin:16px auto 2px;line-height:1.68}
 .cat-desc p{color:#5a5064;font-size:.99rem;margin:.45em 0}
+
+/* ===== BLACK FRIDAY — date-gated card + popup, premium on-brand ===== */
+.bf-card,.bf-pop{display:none}
+html.bf .bf-card{display:flex}
+html.bf-home .bf-pop.show{display:flex}
+
+/* homepage promo card */
+.bf-card{max-width:1160px;margin:22px auto 4px;padding:18px 24px;gap:18px;flex-wrap:wrap;
+  align-items:center;justify-content:space-between;
+  background:linear-gradient(135deg,var(--plum-d),var(--royal));
+  border:1px solid rgba(228,207,149,.5);border-radius:18px;color:#fff;
+  box-shadow:0 16px 40px rgba(42,15,62,.28)}
+.bf-card-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bf-card-tag{letter-spacing:.3em;font-size:.68rem;font-weight:600;color:var(--gold-l)}
+.bf-card-offer{font-family:var(--serif);font-size:1.5rem;color:#fff}
+.bf-card-offer b{color:var(--gold-l)}
+.bf-card-offer s{color:rgba(255,255,255,.55);font-size:1rem;margin-left:4px}
+.bf-card-date{font-size:.86rem;color:rgba(255,255,255,.75)}
+.bf-card-btn{flex:none;background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#3a2410;
+  font-weight:700;padding:12px 20px;border-radius:999px;white-space:nowrap}
+.bf-card:hover .bf-card-btn{filter:brightness(1.06)}
+
+/* Black Friday tile inside the categories grid */
+.bf-cat{display:none;flex-direction:column;border-radius:16px 16px 14px 14px;overflow:hidden;
+  border:1px solid rgba(228,207,149,.6);background:linear-gradient(135deg,var(--plum-d),var(--royal));
+  color:#fff;box-shadow:0 14px 34px rgba(42,15,62,.25);transition:transform .15s}
+html.bf .bf-cat{display:flex}
+.bf-cat:hover{transform:translateY(-3px)}
+.bf-cat-media{position:relative;aspect-ratio:3/4;overflow:hidden;background:#120d08}
+.bf-cat-media img{width:100%;height:100%;object-fit:cover}
+.bf-cat-body{padding:16px 18px 20px;text-align:center;display:flex;flex-direction:column;gap:6px}
+.bf-cat-tag{letter-spacing:.26em;font-size:.66rem;font-weight:600;color:var(--gold-l)}
+.bf-cat-price{font-family:var(--serif);font-size:1.4rem}
+.bf-cat-price b{color:var(--gold-l)}
+.bf-cat-price s{color:rgba(255,255,255,.5);font-size:.95rem;margin-right:5px}
+.bf-cat-link{font-size:.85rem;color:rgba(255,255,255,.85);font-weight:600}
+.bf-cat:hover .bf-cat-link{color:var(--gold-l)}
+
+/* dedicated Black Friday page hero */
+.bfp-hero{background:linear-gradient(135deg,var(--plum-d),var(--royal));color:#fff;text-align:center;
+  padding:clamp(44px,8vw,80px) 20px}
+.bfp-in{max-width:760px;margin:0 auto}
+.bfp-tag{display:inline-block;letter-spacing:.3em;text-indent:.3em;font-weight:600;font-size:.72rem;
+  color:var(--gold-l);border:1px solid rgba(228,207,149,.45);border-radius:999px;padding:7px 15px}
+.bfp-h{font-family:var(--serif);font-weight:700;font-size:clamp(2.4rem,7vw,4rem);margin:.4em 0 .05em;color:#fff}
+.bfp-price{font-family:var(--serif);margin:.1em 0}
+.bfp-price s{color:rgba(255,255,255,.5);font-size:clamp(1.3rem,3.4vw,2rem);margin-right:.35em}
+.bfp-price b{color:var(--gold-l);font-size:clamp(2.6rem,7vw,4.2rem)}
+.bfp-sub{color:rgba(255,255,255,.85);font-size:1.02rem;margin:.6em auto 0;max-width:34em}
+.bfp-cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:24px}
+.bfp-note{text-align:center;color:var(--muted);font-size:.92rem;margin:6px 0 2px}
+
+/* popup — premium cream card */
+.bf-pop{position:fixed;inset:0;z-index:120;background:rgba(42,15,62,.55);align-items:center;justify-content:center;padding:20px}
+.bf-pop-card{position:relative;max-width:380px;width:100%;text-align:center;background:var(--cream);
+  border:1px solid rgba(194,161,92,.6);border-radius:20px;padding:34px 26px 28px;
+  box-shadow:0 30px 70px rgba(42,15,62,.4)}
+.bf-pop-x{position:absolute;top:8px;right:14px;background:none;border:none;color:var(--muted);font-size:1.7rem;line-height:1;cursor:pointer}
+.bf-pop-tag{display:inline-block;letter-spacing:.3em;text-indent:.3em;font-size:.66rem;font-weight:600;color:var(--gold)}
+.bf-pop-h{font-family:var(--serif);font-size:1.6rem;margin:.5em 0 .1em;color:var(--plum)}
+.bf-pop-price{font-family:var(--serif);margin:.1em 0}
+.bf-pop-price s{color:var(--muted);margin-right:.3em;font-size:1.3rem}
+.bf-pop-price b{color:var(--plum);font-size:2.6rem}
+.bf-pop-sub{color:var(--muted);font-size:.9rem;margin:.4em auto 1em;max-width:26em}
+.bf-pop-btn{width:100%;justify-content:center}
+.bf-pop-dir{display:inline-flex;align-items:center;gap:6px;margin-top:12px;color:var(--plum);font-weight:600;font-size:.9rem}
+.bf-pop-dir:hover{color:var(--royal)}

@@ -372,7 +372,8 @@ def head(title_ka, title_en, desc_ka, canonical, preload_img=None, og_image=None
 <noscript><link rel="stylesheet" href="{FONT_URL}"></noscript>
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" href="assets/img/logo.webp">
-{ld_block}'''
+{ld_block}
+{BF_GATE}'''
 
 def header_html():
     return f'''<header class="site-header">
@@ -835,6 +836,196 @@ def foot_about():
     return f'<p class="foot-about">{i18n(ka, en, "span", ru=ru)}</p>'
 
 
+# ---------------------------------------------------------------- Black Friday mode (date-gated)
+BF_N = 0  # number of framed images, set in main()
+
+BF_GATE = '''<script>
+(function(){try{
+  var p=new URLSearchParams(location.search),f=p.get('bf'),on;
+  if(f==='1')on=true;else if(f==='0')on=false;
+  else{var t=new Date(Date.now()+14400000);var y=t.getUTCFullYear(),m=t.getUTCMonth()+1,d=t.getUTCDate();on=(y===2026&&m===11&&d>=23&&d<=29);}
+  if(on){var h=document.documentElement;h.classList.add('bf');if(/(^|\\/)(index\\.html)?$/.test(location.pathname))h.classList.add('bf-home');}
+}catch(e){}})();
+</script>'''
+
+BF_JS = '''<script>
+(function(){
+  if(!document.documentElement.classList.contains('bf-home'))return;
+  document.querySelectorAll('.bf-gallery img[data-src]').forEach(function(im){im.src=im.getAttribute('data-src');im.removeAttribute('data-src');});
+  try{
+    var pop=document.getElementById('bfPop');
+    if(pop){
+      if(!sessionStorage.getItem('bfpop'))pop.classList.add('show');
+      var close=function(){pop.classList.remove('show');try{sessionStorage.setItem('bfpop','1');}catch(e){}};
+      var x=document.getElementById('bfPopX');if(x)x.addEventListener('click',close);
+      pop.addEventListener('click',function(e){if(e.target===pop)close();});
+    }
+  }catch(e){}
+})();
+</script>'''
+
+def bf_card():
+    return f'''<a class="bf-card" href="black-friday.html" aria-label="Black Friday">
+  <span class="bf-card-main">
+    <span class="bf-card-tag">BLACK FRIDAY</span>
+    <span class="bf-card-offer">{i18n("ფლიზელინის შპალერი","Flizeline wallpaper","span",ru="Флизелиновые обои")} — <b>40₾</b> <s>70₾</s></span>
+    <span class="bf-card-date">{i18n("23–29 ნოემბერი · მხოლოდ 7 დღე","Nov 23–29 · only 7 days","span",ru="23–29 ноября · только 7 дней")}</span>
+  </span>
+  <span class="bf-card-btn">{i18n("ნახეთ კოლექცია","View collection","span",ru="Смотреть коллекцию")} <span aria-hidden="true">→</span></span>
+</a>'''
+
+def bf_cat_card():
+    return f'''<a class="bf-cat" href="black-friday.html" aria-label="Black Friday">
+      <div class="bf-cat-media"><img loading="lazy" src="assets/bf/bf-01.webp" alt="Black Friday"></div>
+      <div class="bf-cat-body">
+        <span class="bf-cat-tag">BLACK FRIDAY</span>
+        <div class="bf-cat-price"><s>70₾</s> <b>40₾</b></div>
+        <span class="bf-cat-link">{i18n("ნახეთ კოლექცია","View collection","span",ru="Смотреть коллекцию")} →</span>
+      </div>
+    </a>'''
+
+def bf_popup():
+    return f'''<div class="bf-pop" id="bfPop" role="dialog" aria-modal="true" aria-label="Black Friday">
+  <div class="bf-pop-card">
+    <button class="bf-pop-x" id="bfPopX" type="button" aria-label="Close">&times;</button>
+    <span class="bf-pop-tag">BLACK FRIDAY</span>
+    <h2 class="bf-pop-h">{i18n("შავი პარასკევი დაიწყო","Black Friday is here","span",ru="Чёрная пятница")}</h2>
+    <p class="bf-pop-price"><s>70₾</s> <b>40₾</b></p>
+    <p class="bf-pop-sub">{i18n("ფლიზელინის შპალერი · 1.06×10მ · 23–29 ნოემბერი","Flizeline wallpaper · 1.06×10m · Nov 23–29","span",ru="Флизелиновые обои · 1.06×10м · 23–29 ноября")}</p>
+    <a class="btn btn-gold bf-pop-btn" href="black-friday.html">{i18n("ნახეთ კოლექცია","View collection","span",ru="Смотреть коллекцию")}</a>
+    <a class="bf-pop-dir" href="{esc(BIZ["maps"])}" target="_blank" rel="noopener">{icon('pin',18)}<span>{i18n("მოგვძებნეთ რუკაზე","Get directions","span",ru="Маршрут")}</span></a>
+  </div>
+</div>'''
+
+def render_bf():
+    items = []
+    for i in range(1, BF_N + 1):
+        img = f"assets/bf/bf-{i:02d}.webp"
+        items.append(f'''<figure class="item" data-num="{i:02d}" data-img="{img}" tabindex="0" role="button" aria-label="#{i:02d}">
+      <div class="item-img">
+        <img loading="lazy" src="{img}" alt="Black Friday wallpaper {i}">
+        <span class="zoom">{icon('zoom')}</span>
+      </div>
+      <figcaption>#{i:02d}</figcaption>
+    </figure>''')
+    grid = "\n".join(items) if items else f'<p class="muted">{i18n("ფოტოები მალე","Photos coming soon",ru="Фото скоро")}</p>'
+    lightbox = f'''<div class="lb" id="lb" aria-hidden="true">
+  <button class="lb-close" id="lb-close" aria-label="Close">{icon('close', 26)}</button>
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">{icon('chevL', 30)}</button>
+  <figure class="lb-stage"><img id="lb-img" src="" alt=""></figure>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next">{icon('chevR', 30)}</button>
+  <div class="lb-bar"><span id="lb-cap"></span><span id="lb-count"></span></div>
+</div>'''
+    hero = f'''<section class="bfp-hero">
+  <div class="bfp-in">
+    <span class="bfp-tag">BLACK FRIDAY · EURODECOR</span>
+    <h1 class="bfp-h">{i18n("შავი პარასკევი","Black Friday","span",ru="Чёрная пятница")}</h1>
+    <p class="bfp-price"><s>70₾</s><b>40₾</b></p>
+    <p class="bfp-sub">{i18n("ფლიზელინის შპალერი · ზომა 1.06 × 10 მ · მხოლოდ 7 დღე (23–29 ნოემბერი)","Flizeline wallpaper · 1.06 × 10 m · only 7 days (Nov 23–29)","span",ru="Флизелиновые обои · 1.06 × 10 м · только 7 дней (23–29 ноября)")}</p>
+    <div class="bfp-cta">
+      <a class="btn btn-gold" href="{esc(BIZ['maps'])}" target="_blank" rel="noopener">{icon('pin')}<span>{i18n("მოგვძებნეთ რუკაზე","Get directions","span",ru="Маршрут")}</span></a>
+      <a class="btn btn-ghost" href="{esc(BIZ['messenger'])}" target="_blank" rel="noopener">{i18n("მოგვწერეთ","Message us","span",ru="Напишите нам")}</a>
+    </div>
+  </div>
+</section>'''
+    body = f'''{header_html()}
+{hero}
+{contact_bar()}
+<main class="container">
+  <h2 class="section-title">{i18n("Black Friday კოლექცია","Black Friday collection","span",ru="Коллекция Black Friday")}</h2>
+  {leaf_div(center=True)}
+  <p class="bfp-note">{i18n("დააჭირეთ ფოტოს გასადიდებლად და დაათვალიერეთ ერთმანეთის მიყოლებით","Tap a photo to open it and browse one by one","span",ru="Нажмите на фото, чтобы открыть и листать по одному")}</p>
+  <div class="item-grid">
+    {grid}
+  </div>
+  <p class="back"><a href="index.html">← {i18n("მთავარ გვერდზე","Back to home",ru="На главную")}</a></p>
+</main>
+{footer_html()}
+{lightbox}
+{LANG_JS}
+{LIGHTBOX_JS}
+{FAV_JS.replace("__WA__", BIZ['whatsapp'])}'''
+    title_ka = "Black Friday — ფლიზელინის შპალერი 40₾ | ევროდეკორი"
+    title_en = "Black Friday — Flizeline wallpaper 40₾ | Eurodecor"
+    desc = "Black Friday Eurodecor — ფლიზელინის შპალერი 40₾ ნაცვლად 70₾, 23–29 ნოემბერი. თბილისი, აკაკი წერეთლის 130."
+    canonical = BIZ["site_url"] + "/black-friday.html"
+    og = BIZ["site_url"] + "/assets/bf/bf-01.webp"
+    return f'''<!doctype html><html lang="ka" data-lang="ka"><head>
+{head(title_ka, title_en, desc, canonical, og_image=og)}
+</head><body>
+{body}
+{ANALYTICS}
+</body></html>'''
+
+BF_CSS = """
+/* ===== BLACK FRIDAY — date-gated card + popup, premium on-brand ===== */
+.bf-card,.bf-pop{display:none}
+html.bf .bf-card{display:flex}
+html.bf-home .bf-pop.show{display:flex}
+
+/* homepage promo card */
+.bf-card{max-width:1160px;margin:22px auto 4px;padding:18px 24px;gap:18px;flex-wrap:wrap;
+  align-items:center;justify-content:space-between;
+  background:linear-gradient(135deg,var(--plum-d),var(--royal));
+  border:1px solid rgba(228,207,149,.5);border-radius:18px;color:#fff;
+  box-shadow:0 16px 40px rgba(42,15,62,.28)}
+.bf-card-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bf-card-tag{letter-spacing:.3em;font-size:.68rem;font-weight:600;color:var(--gold-l)}
+.bf-card-offer{font-family:var(--serif);font-size:1.5rem;color:#fff}
+.bf-card-offer b{color:var(--gold-l)}
+.bf-card-offer s{color:rgba(255,255,255,.55);font-size:1rem;margin-left:4px}
+.bf-card-date{font-size:.86rem;color:rgba(255,255,255,.75)}
+.bf-card-btn{flex:none;background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#3a2410;
+  font-weight:700;padding:12px 20px;border-radius:999px;white-space:nowrap}
+.bf-card:hover .bf-card-btn{filter:brightness(1.06)}
+
+/* Black Friday tile inside the categories grid */
+.bf-cat{display:none;flex-direction:column;border-radius:16px 16px 14px 14px;overflow:hidden;
+  border:1px solid rgba(228,207,149,.6);background:linear-gradient(135deg,var(--plum-d),var(--royal));
+  color:#fff;box-shadow:0 14px 34px rgba(42,15,62,.25);transition:transform .15s}
+html.bf .bf-cat{display:flex}
+.bf-cat:hover{transform:translateY(-3px)}
+.bf-cat-media{position:relative;aspect-ratio:3/4;overflow:hidden;background:#120d08}
+.bf-cat-media img{width:100%;height:100%;object-fit:cover}
+.bf-cat-body{padding:16px 18px 20px;text-align:center;display:flex;flex-direction:column;gap:6px}
+.bf-cat-tag{letter-spacing:.26em;font-size:.66rem;font-weight:600;color:var(--gold-l)}
+.bf-cat-price{font-family:var(--serif);font-size:1.4rem}
+.bf-cat-price b{color:var(--gold-l)}
+.bf-cat-price s{color:rgba(255,255,255,.5);font-size:.95rem;margin-right:5px}
+.bf-cat-link{font-size:.85rem;color:rgba(255,255,255,.85);font-weight:600}
+.bf-cat:hover .bf-cat-link{color:var(--gold-l)}
+
+/* dedicated Black Friday page hero */
+.bfp-hero{background:linear-gradient(135deg,var(--plum-d),var(--royal));color:#fff;text-align:center;
+  padding:clamp(44px,8vw,80px) 20px}
+.bfp-in{max-width:760px;margin:0 auto}
+.bfp-tag{display:inline-block;letter-spacing:.3em;text-indent:.3em;font-weight:600;font-size:.72rem;
+  color:var(--gold-l);border:1px solid rgba(228,207,149,.45);border-radius:999px;padding:7px 15px}
+.bfp-h{font-family:var(--serif);font-weight:700;font-size:clamp(2.4rem,7vw,4rem);margin:.4em 0 .05em;color:#fff}
+.bfp-price{font-family:var(--serif);margin:.1em 0}
+.bfp-price s{color:rgba(255,255,255,.5);font-size:clamp(1.3rem,3.4vw,2rem);margin-right:.35em}
+.bfp-price b{color:var(--gold-l);font-size:clamp(2.6rem,7vw,4.2rem)}
+.bfp-sub{color:rgba(255,255,255,.85);font-size:1.02rem;margin:.6em auto 0;max-width:34em}
+.bfp-cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:24px}
+.bfp-note{text-align:center;color:var(--muted);font-size:.92rem;margin:6px 0 2px}
+
+/* popup — premium cream card */
+.bf-pop{position:fixed;inset:0;z-index:120;background:rgba(42,15,62,.55);align-items:center;justify-content:center;padding:20px}
+.bf-pop-card{position:relative;max-width:380px;width:100%;text-align:center;background:var(--cream);
+  border:1px solid rgba(194,161,92,.6);border-radius:20px;padding:34px 26px 28px;
+  box-shadow:0 30px 70px rgba(42,15,62,.4)}
+.bf-pop-x{position:absolute;top:8px;right:14px;background:none;border:none;color:var(--muted);font-size:1.7rem;line-height:1;cursor:pointer}
+.bf-pop-tag{display:inline-block;letter-spacing:.3em;text-indent:.3em;font-size:.66rem;font-weight:600;color:var(--gold)}
+.bf-pop-h{font-family:var(--serif);font-size:1.6rem;margin:.5em 0 .1em;color:var(--plum)}
+.bf-pop-price{font-family:var(--serif);margin:.1em 0}
+.bf-pop-price s{color:var(--muted);margin-right:.3em;font-size:1.3rem}
+.bf-pop-price b{color:var(--plum);font-size:2.6rem}
+.bf-pop-sub{color:var(--muted);font-size:.9rem;margin:.4em auto 1em;max-width:26em}
+.bf-pop-btn{width:100%;justify-content:center}
+.bf-pop-dir{display:inline-flex;align-items:center;gap:6px;margin-top:12px;color:var(--plum);font-weight:600;font-size:.9rem}
+.bf-pop-dir:hover{color:var(--royal)}
+"""
+
 def render_home(cats):
     cards = []
     for c in cats:
@@ -895,13 +1086,16 @@ def render_home(cats):
     </div>
   </section>'''
     body = f'''{header_html()}
+{bf_popup()}
 {hero}
+{bf_card()}
 {contact_bar()}
 <main class="container">
   <h2 class="section-title" id="categories">{i18n("კატეგორიები","Categories","span",ru="Категории")}</h2>
   {leaf_div(center=True)}
   {filter_bar}
   <div class="cat-grid" id="catGrid">
+    {bf_cat_card()}
     {grid}
   </div>
 </main>
@@ -911,7 +1105,8 @@ def render_home(cats):
 {LANG_JS}
 {CALC_JS}
 {FAV_JS.replace("__WA__", BIZ['whatsapp'])}
-{FILTER_JS}'''
+{FILTER_JS}
+{BF_JS}'''
     title_ka = "ევროდეკორი — შპალერების მაღაზია თბილისში"
     title_en = "Eurodecor — Wallpaper Store in Tbilisi"
     desc = "შპალერი, ვინილის შპალერი, ფლიზელინი, შესაღები შპალერი და შპალერის წებო — საუკეთესო ფასებში, პირდაპირ ქარხნიდან. თბილისი, აკაკი წერეთლის 130."
@@ -1365,6 +1560,7 @@ html[data-lang="ru"] .ka,html[data-lang="ru"] .en{{display:none !important}}
 .cat-desc{{max-width:680px;margin:16px auto 2px;line-height:1.68}}
 .cat-desc p{{color:#5a5064;font-size:.99rem;margin:.45em 0}}
 '''
+    css += BF_CSS
     with open(os.path.join(OUT, "styles.css"), "w", encoding="utf-8") as f:
         f.write(css)
 
@@ -1382,6 +1578,19 @@ def main():
     optimize_logo(LOGO_SRC, os.path.join(IMG_OUT, "mark.webp"), maxw=200, box=(348, 244, 852, 748))
     # hero art = the product scene cropped from the Facebook cover
     optimize_cover(COVER_SRC, os.path.join(IMG_OUT, "hero.webp"), box=(880, 0, 1942, 809))
+
+    # Black Friday framed images -> date-gated gallery (assets/bf)
+    global BF_N
+    import glob as _glob
+    bf_src = r"D:\Eurodecor\Black Friday\Framed"
+    if os.path.isdir(bf_src):
+        bf_dir = os.path.join(OUT, "assets", "bf")
+        os.makedirs(bf_dir, exist_ok=True)
+        bf_files = sorted(_glob.glob(os.path.join(bf_src, "bf-*.jpg")))
+        for i, bf in enumerate(bf_files, 1):
+            optimize(bf, os.path.join(bf_dir, f"bf-{i:02d}.webp"), maxw=820, quality=80)
+        BF_N = len(bf_files)
+        print(f"  black friday: {BF_N} framed images -> assets/bf")
 
     cats = read_categories()
     for c in cats:
@@ -1402,6 +1611,11 @@ def main():
     for c in cats:
         with open(os.path.join(OUT, f"category-{c['no']}.html"), "w", encoding="utf-8") as f:
             f.write(render_category(c))
+
+    if BF_N:
+        with open(os.path.join(OUT, "black-friday.html"), "w", encoding="utf-8") as f:
+            f.write(render_bf())
+        print("  black-friday.html")
 
     write_sitemap(cats)
     print(f"\nBuilt {len(cats)} categories -> {OUT}")
